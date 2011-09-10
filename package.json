@@ -1,0 +1,19 @@
+{
+    "name": "replicant",
+    "description": "Javascript object proxy",
+    "version": "0.1.0",
+    "authors": ["Alex Robson"],
+    "keywords": ["proxy"],
+    "main": "./lib/replicant.js",
+    "homepage": "http://arobson.github.com/replicant",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/arobson/replicant.git"
+    },
+    "engines" : { "node" : ">=0.4.0" },
+    "dependencies": {
+        "underscore": ">=0.1.7"
+    },
+    "directories": { "lib": "./lib" },
+    "preferGlobal": true
+}

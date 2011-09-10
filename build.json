@@ -1,0 +1,12 @@
+{
+    "source": "src",
+    "modules": "node_modules",
+    "output": "./",
+    "packages": [
+        { "name": "underscore" }
+    ],
+    "uglify": {
+    },
+    "prefix": "(function(context) {",
+    "suffix": ")(this));"
+ }
