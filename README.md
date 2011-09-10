@@ -12,3 +12,9 @@ If it's not javascript 1.8.1 or better, Replicant can't help you. This may chang
 
 I highly encourage the use of a local message bus in order to publish changes to the proxied object vs. attempting to inject a lot of complex operations into the get and set callbacks.
 
+## To Do
+
+* Add wrapper
+* Abstract dynamic member creation
+* Write tests
+* Finish build tool so I can build it
