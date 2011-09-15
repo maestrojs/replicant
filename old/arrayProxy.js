@@ -48,8 +48,8 @@ var ArrayProksy = function(
 
     var createIndex = function( proxy, key ) {
         var original = subject[key];
-        var isObject = _(original ).isObject();
-        var isArray = _(original ).isArray();
+        var isObject = underscore(original ).isObject();
+        var isArray = underscore(original ).isArray();
         var fqn = buildFqn( path, key );
         addToParent( fqn, proxy[key] );
         if( isObject || isArray ) {
@@ -111,7 +111,7 @@ var ArrayProksy = function(
         return value;
     };
 
-    _(array)
+    underscore(array)
         .chain()
         .keys()
         .each( function( key ) {
