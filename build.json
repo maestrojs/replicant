@@ -6,6 +6,6 @@
     "gzip": {},
     "wrap":{
         "prefix": "(function(context) {",
-        "suffix": ")(this));"
+        "suffix": "})(window);"
     }
  }

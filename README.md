@@ -17,4 +17,3 @@ I highly encourage the use of a local message bus in order to publish changes to
 * Add wrapper
 * Abstract dynamic member creation
 * Write tests
-* Finish build tool so I can build it

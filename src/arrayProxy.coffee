@@ -23,19 +23,14 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
 
   setCallback = (key, newValue, oldValue) -> onSet key, newValue, oldValue
 
-  createIndex = (proxy, key) ->
+  createIndex = ( proxy, key ) ->
     original = subject[key]
-    isObject = _(original).isObject()
-    isArray = _(original).isArray()
-    fqn = buildFqn(path, key)
+    fqn = buildFqn path, key
     addToParent fqn, proxy[key]
-    if isObject or isArray
-      proxy[key] = (
-        if isArray then new ArrayProxy(original, onGet, onSet, fqn, addChildPath, removeChildPath)
-        else new Proxy(original, onGet, onSet, fqn, addChildPath, removeChildPath)
-      )
-    else
-      proxy[key] = original
+    proxy[key] = onProxyOf original,
+      -> new ArrayProxy( original, onGet, onSet, fqn, addChildPath, removeChildPath ),
+      -> new ObjectProxy( original, onGet, onSet, fqn, addChildPath, removeChildPath ),
+      -> original
     Object.defineProperty self, key,
       get: ->
         value = proxy[key]
@@ -45,10 +40,11 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
         old = proxy[key]
         proxy[key] = value
         setCallback fqn, value, old
+
       configurable: true
       enumerable: true
 
-    ###include "arrayOps.coffee" ###
-
+  ###import "arrayOps.coffee" ###
+  
   _(array).chain().keys().each (key) ->
-    createIndex proxy, key
+    createIndex( proxy, key )

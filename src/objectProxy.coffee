@@ -1,4 +1,4 @@
-ObjectProxy = (subject, onGet, onSet, namespace, removeChild) ->
+ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
   self = this
   lastRead = []
   lastSet = []
@@ -37,15 +37,11 @@ ObjectProxy = (subject, onGet, onSet, namespace, removeChild) ->
     onSet key, newValue, oldValue
     lastSet.push key
 
-  createProxyFor = (writing, self, proxy, fqn, key, value) ->
-    isObject = _(value).isObject()
-    isArray = _(value).isArray()
-    if isObject or isArray
-      proxy[key] =
-        (if isArray then new ArrayProksy(value, onGet, onSet, fqn, addChildPath, removeChildPath)
-        else new Proksy(value, onGet, onSet, fqn, addChildPath, removeChildPath)
-        )
-        if writing or proxy[key] == undefined
+  createProxyFor = ( writing, self, proxy, fqn, key, value ) ->
+    if writing or proxy[key] == undefined
+      proxy[key] = onProxyOf value,
+        -> new ArrayProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
+        -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath )
       value = proxy[key]
     value
 
