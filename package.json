@@ -1,7 +1,7 @@
 {
     "name": "replicant",
     "description": "Javascript object proxy",
-    "version": "0.1.0",
+    "version": "0.0.1",
     "authors": ["Alex Robson"],
     "keywords": ["proxy"],
     "main": "./src/replicant.js",
