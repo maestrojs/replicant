@@ -41,7 +41,8 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     if writing or proxy[key] == undefined
       proxy[key] = onProxyOf value,
         -> new ArrayProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
-        -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath )
+        -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
+        -> value
       value = proxy[key]
     value
 
@@ -66,3 +67,4 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
 
   _(subject).chain().keys().each (key) ->
     createMemberProxy self, proxy, key
+  self

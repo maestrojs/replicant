@@ -48,3 +48,4 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
   
   _(array).chain().keys().each (key) ->
     createIndex( proxy, key )
+  self
