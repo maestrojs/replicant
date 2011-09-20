@@ -5,6 +5,8 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
   path = namespace or ""
   noOp = ->
 
+  self["name"] = "ArrayProxy"
+
   addToParent = addChild or noOp
   removeFromParent = removeChild or noOp
 
@@ -19,26 +21,31 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
     delete self[fqn]
     removeFromParent fqn
 
-  getCallback = (key, value) -> onGet key, value
+  getCallback = (key, value) ->
+    console.log "Got #{key}"
+    onGet key, value
 
-  setCallback = (key, newValue, oldValue) -> onSet key, newValue, oldValue
+  setCallback = (key, newValue, oldValue) ->
+    console.log "Set #{key}"
+    onSet key, newValue, oldValue
 
-  createIndex = ( proxy, key ) ->
+  createIndex = ( target, key ) ->
     original = subject[key]
     fqn = buildFqn path, key
-    addToParent fqn, proxy[key]
-    proxy[key] = onProxyOf original,
+    addToParent fqn, target[key]
+    target[key] = onProxyOf original,
       -> new ArrayProxy( original, onGet, onSet, fqn, addChildPath, removeChildPath ),
       -> new ObjectProxy( original, onGet, onSet, fqn, addChildPath, removeChildPath ),
       -> original
     Object.defineProperty self, key,
       get: ->
-        value = proxy[key]
+        value = target[key]
         getCallback fqn, value
         value
-      set: ->
-        old = proxy[key]
-        proxy[key] = value
+      set: (value) ->
+        old = target[key]
+        target[key] = value
+        subject[key] = value
         setCallback fqn, value, old
 
       configurable: true

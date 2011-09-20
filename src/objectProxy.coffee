@@ -18,6 +18,8 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     lastSet = []
     list
 
+  self["name"] = "ObjectProxy"
+
   addChildPath = (fqn, child, key) ->
     Object.defineProperty self, fqn,
       get: -> child[key]
@@ -30,37 +32,38 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     removeFromParent fqn
 
   getCallback = (key, value) ->
+    console.log "Got #{key} of #{typeof value}"
     onGet key, value
     lastRead.push key
 
   setCallback = (key, newValue, oldValue) ->
+    console.log "Set #{key}"
     onSet key, newValue, oldValue
     lastSet.push key
 
-  createProxyFor = ( writing, self, proxy, fqn, key, value ) ->
+  createProxyFor = ( writing, self, proxy, fqn, key ) ->
+    value = subject[key]
     if writing or proxy[key] == undefined
       proxy[key] = onProxyOf value,
         -> new ArrayProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
         -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
         -> value
-      value = proxy[key]
-    value
+    proxy[key]
 
   createMemberProxy = (self, proxy, key) ->
     fqn = buildFqn(path, key)
     addChildPath fqn, self, key
     Object.defineProperty self, key,
       get: ->
-        value = subject[key]
-        value = createProxyFor(false, self, proxy, fqn, key, value)
+        value = createProxyFor(false, self, proxy, fqn, key)
         getCallback fqn, value
         value
 
       set: (value) ->
-        old = subject[key]
+        old = proxy[key]
         subject[key] = value
-        value = createProxyFor(true, self, proxy, fqn, key, value)
-        setCallback fqn, value, old
+        newValue = createProxyFor(true, self, proxy, fqn, key)
+        setCallback fqn, newValue, old
 
       configurable: true
       enumerable: true

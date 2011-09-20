@@ -1,6 +1,8 @@
   @push = (value) ->
+    console.log "#{value} was pushed"
+    key = subject.length
     subject.push value
-    key = subject.length - 1
+    console.log "Creating proxy for #{key}"
     createIndex proxy, key
     fqn = buildFqn(path, key)
     setCallback fqn, value, undefined

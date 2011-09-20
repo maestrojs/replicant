@@ -4,7 +4,7 @@
     "version": "0.0.1",
     "authors": ["Alex Robson"],
     "keywords": ["proxy"],
-    "main": "./src/replicant.js",
+    "main": "./lib/replicant.js",
     "homepage": "http://arobson.github.com/replicant",
     "repository": {
         "type": "git",
@@ -14,6 +14,6 @@
     "dependencies": {
         "underscore": ">=0.1.7"
     },
-    "directories": { "lib": "./src" },
+    "directories": { "lib": "./lib" },
     "preferGlobal": true
 }
