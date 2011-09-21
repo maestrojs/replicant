@@ -9,11 +9,11 @@ class DomProxy
             member = if @namespace == template then @namespace else @namespace.replace prefix, "", "gi"
             self[member] = domFactory child, member
 
-    coalesce: ( value, defaultValue ) ->
+    coalesce = ( value, defaultValue ) ->
         if typeof(value) != 'undefined' then value else defaultValue
 
     crawl: ( namespace, element, callback ) ->
-        id = self.coalesce element["id"], ""
+        id = coalesce element["id"], ""
         fqn = buildFqn namespace, id
         callback fqn, id, element
         if element.children != undefined and element.children.length > 0
