@@ -13,7 +13,7 @@ class DomProxy
         if typeof(value) != 'undefined' then value else defaultValue
 
     crawl: ( namespace, element, callback ) ->
-        id = coalesce element["id"], ""
+        id = self.coalesce element["id"], ""
         fqn = buildFqn namespace, id
         callback fqn, id, element
         if element.children != undefined and element.children.length > 0
