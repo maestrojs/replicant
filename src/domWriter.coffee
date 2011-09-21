@@ -1,21 +1,12 @@
-domFactory = ( target, namespace ) ->
-    switch target[0].tagName.toLowerCase()
-        when "div" new DivProxy target, namespace
-        when "span" new SpanProxy target, namespace
-        when "input" new InputProxy target, namespace
-        when "ul" new UlProxy target, namespace
-        when "li" new LiProxy target, namespace
-
 class DomProxy
-    constructor (target, @namespace) ->
+    constructor: (target, @namespace) ->
         self = this
         template = @namespace
         @element = target[0]
 
         self.crawl "", @element, ( @namespace, key, child ) ->
             prefix = template + ".";
-            member = if @namespace === template then
-                @namespace else @namespace.replace prefix, "", "gi"
+            member = if @namespace == template then @namespace else @namespace.replace prefix, "", "gi"
             self[member] = domFactory child, member
 
     coalesce: ( value, defaultValue ) ->
@@ -25,8 +16,7 @@ class DomProxy
         id = coalesce element["id"], ""
         fqn = buildFqn namespace, id
         callback fqn, id, element
-        if element.children !== undefined and
-            element.children.length > 0
+        if element.children != undefined and element.children.length > 0
             _(element.children)
                 .chain()
                 .each ( child ) ->
@@ -91,3 +81,12 @@ class LiProxy extends DomProxy
     write: ( path, value ) ->
         if path == @namespace
             $(@element).text( value )
+
+domFactory = ( target, namespace ) ->
+    this["div"] = ( target, namespace ) -> new DivProxy( target, namespace )
+    this["span"] = ( target, namespace ) -> new SpanProxy( target, namespace )
+    this["input"] = ( target, namespace ) -> new InputProxy( target, namespace )
+    this["ul"] = ( target, namespace ) -> new UlProxy( target, namespace )
+    this["li"] = ( target, namespace ) -> new LiProxy( target, namespace )
+
+    return this[target[0].tagName.toLowerCase()]( target, namespace )
