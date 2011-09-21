@@ -93,4 +93,4 @@ domFactory = ( target, namespace ) ->
         element = $(target)[0]
         return this[element.tagName.toLowerCase()]( element, namespace )
     else
-        return this[target[0].tagName.toLowerCase()]( target, namespace )
+        return this[target.tagName.toLowerCase()]( target, namespace )
