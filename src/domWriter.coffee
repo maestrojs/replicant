@@ -1,12 +1,13 @@
 class DomProxy
-    constructor: (target, @namespace) ->
+    constructor: (target, namespace) ->
         self = this
-        template = @namespace
+        template = namespace
         @element = target
 
-        self.crawl "", @element, ( @namespace, key, child ) ->
+        self.crawl template, @element, ( namespace, key, child ) ->
+            console.log "#{template} - #{namespace}.#{key}"
             prefix = template + ".";
-            member = if @namespace == template then @namespace else @namespace.replace prefix, "", "gi"
+            member = if namespace == template then namespace else namespace.replace prefix, "", "gi"
             self[member] = domFactory child, member
 
     coalesce = ( value, defaultValue ) ->
@@ -15,12 +16,13 @@ class DomProxy
     crawl: ( namespace, element, callback ) ->
         id = coalesce element["id"], ""
         fqn = buildFqn namespace, id
-        callback fqn, id, element
+        if element != @element
+            callback fqn, id, element
         if element.children != undefined and element.children.length > 0
             _(element.children)
                 .chain()
                 .each ( child ) ->
-                        crawl fqn, child, callback
+                        self.crawl fqn, child, callback
 
 class DivProxy extends DomProxy
 
