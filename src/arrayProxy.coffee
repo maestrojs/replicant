@@ -22,11 +22,9 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
     removeFromParent fqn
 
   getCallback = (key, value) ->
-    console.log "Got #{key}"
     onGet key, value
 
   setCallback = (key, newValue, oldValue) ->
-    console.log "Set #{key}"
     onSet key, newValue, oldValue
 
   createProxyFor = ( writing, fqn, key ) ->
@@ -41,6 +39,7 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
   createIndex = ( key ) ->
     fqn = buildFqn path, key
     addToParent fqn, proxy[key]
+    createProxyFor(false, fqn, key)
 
     Object.defineProperty self, key,
       get: ->

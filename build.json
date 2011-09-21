@@ -2,6 +2,7 @@
     "source": "src",
     "output": "lib",
     "lint": {},
+    "uglify": {},
     "wrap":{
         "prefix": "(function(context) {",
         "suffix": "})(window);"

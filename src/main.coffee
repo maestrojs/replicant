@@ -14,4 +14,7 @@ replicant =
     -> new ObjectProxy( target, onGet, onSet, namespace ),
     -> target
 
+  scan: ( target, namespace ) ->
+    domFactory target, namespace
+
 context["replicant"] = replicant

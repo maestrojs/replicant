@@ -32,12 +32,10 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     removeFromParent fqn
 
   getCallback = (key, value) ->
-    console.log "Got #{key} of #{typeof value}"
     onGet key, value
     lastRead.push key
 
   setCallback = (key, newValue, oldValue) ->
-    console.log "Set #{key}"
     onSet key, newValue, oldValue
     lastSet.push key
 
@@ -52,7 +50,9 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
 
   createMemberProxy = (self, proxy, key) ->
     fqn = buildFqn(path, key)
-    addChildPath fqn, self, key
+    addToParent fqn, self, key
+    createProxyFor(false, fqn, key)
+    
     Object.defineProperty self, key,
       get: ->
         value = createProxyFor(false, fqn, key)
@@ -70,4 +70,5 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
 
   _(subject).chain().keys().each (key) ->
     createMemberProxy self, proxy, key
+
   self

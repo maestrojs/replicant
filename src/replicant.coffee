@@ -8,4 +8,5 @@
 ###import "utility.coffee" ####
 ###import "arrayProxy.coffee" ####
 ###import "objectProxy.coffee" ####
+###import "domWriter.coffee" ###
 ###import "main.coffee" ###
