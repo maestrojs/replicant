@@ -89,4 +89,8 @@ domFactory = ( target, namespace ) ->
     this["ul"] = ( target, namespace ) -> new UlProxy( target, namespace )
     this["li"] = ( target, namespace ) -> new LiProxy( target, namespace )
 
-    return this[target[0].tagName.toLowerCase()]( target, namespace )
+    if _.isString target
+        element = $(target)[0]
+        return this[element.tagName.toLowerCase()]( element, namespace )
+    else
+        return this[target[0].tagName.toLowerCase()]( target, namespace )
