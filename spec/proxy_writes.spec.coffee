@@ -8,24 +8,17 @@ QUnit.specify "write proxy", ->
 
         theFellowship =
             title: ""
-            elves: []
             humans: [
                 {
                     name: "Boromir",
                     char_class: "Warrior"
                 }
             ]
-            hobbits: []
-            wizards: []
 
         proxy = replicant.create theFellowship, null, onSet
         proxy.title = "Of The Ring"
         proxy.humans.push { name: "Aragorn", char_class: "Ranger" }
         proxy.humans[0].char_class = "Hero"
-
-        console.log proxy.humans.constructor
-
-        console.log "Boromir is a #{proxy.humans[0].char_class}"
 
         it "should capture title write", ->
             assert( _.any setted, (x) -> x.property == "title" ).isTrue()

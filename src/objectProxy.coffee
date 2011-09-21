@@ -41,7 +41,7 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     onSet key, newValue, oldValue
     lastSet.push key
 
-  createProxyFor = ( writing, self, proxy, fqn, key ) ->
+  createProxyFor = ( writing, fqn, key ) ->
     value = subject[key]
     if writing or proxy[key] == undefined
       proxy[key] = onProxyOf value,
@@ -55,14 +55,14 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     addChildPath fqn, self, key
     Object.defineProperty self, key,
       get: ->
-        value = createProxyFor(false, self, proxy, fqn, key)
+        value = createProxyFor(false, fqn, key)
         getCallback fqn, value
         value
 
       set: (value) ->
         old = proxy[key]
         subject[key] = value
-        newValue = createProxyFor(true, self, proxy, fqn, key)
+        newValue = createProxyFor(true, fqn, key)
         setCallback fqn, newValue, old
 
       configurable: true
