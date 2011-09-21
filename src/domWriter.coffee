@@ -2,7 +2,7 @@ class DomProxy
     constructor: (target, @namespace) ->
         self = this
         template = @namespace
-        @element = target[0]
+        @element = target
 
         self.crawl "", @element, ( @namespace, key, child ) ->
             prefix = template + ".";
