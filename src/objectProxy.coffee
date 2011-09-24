@@ -3,11 +3,11 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
   lastRead = []
   lastSet = []
   proxy = {}
-  path = namespace or ""
+  path = namespace or= ""
   noOp = ->
-  addToParent = addChild or noOp
-  removeFromParent = removeChild or noOp
-
+  addToParent = addChild #or addChildPath
+  removeFromParent = removeChild #or removeChildPath
+  
   lastAccessed = ->
     list = lastRead
     lastRead = []
@@ -25,7 +25,8 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
       get: -> child[key]
       set: (value) -> child[key] = value
       configurable: true
-    addToParent fqn, child, key
+    if addToParent
+        addToParent fqn, child, key
 
   removeChildPath = (fqn) ->
     delete self[fqn]
@@ -50,7 +51,10 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
 
   createMemberProxy = (self, proxy, key) ->
     fqn = buildFqn(path, key)
-    addToParent fqn, self, key
+    if addToParent
+        addToParent fqn, self, key
+    else
+        addChildPath fqn, self, key
     createProxyFor(false, fqn, key)
     
     Object.defineProperty self, key,
@@ -67,6 +71,10 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
 
       configurable: true
       enumerable: true
+
+   Object.defineProperty self, "length",
+    get: ->
+        proxy.length
 
   _(subject).chain().keys().each (key) ->
     createMemberProxy self, proxy, key

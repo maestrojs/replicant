@@ -99,11 +99,11 @@ QUnit.specify "namespace", ->
                     vendor: "Western Digital"
                 }
             ]
-        myPC = replicant.create myPC
+        myPC = replicant.create myPC, null, null, "myPC"
 
-        myPC["storage.1.capacity"] = "1 TB"
-        myPC["memory.1.sticks.1.pin"] = 240
-        gpuRAM =  myPC["gpu.ram"]
+        myPC["myPC.storage.1.capacity"] = "1 TB"
+        myPC["myPC.memory.1.sticks.1.pin"] = 240
+        gpuRAM =  myPC["myPC.gpu.ram"]
         secondDiskSize = myPC.storage[1].capacity #myPC["storage.1.capacity"]
         fourthRAMStickPinSize = myPC.memory[1].sticks[1].pin #myPC["memory.1.sticks.1.pin"]
 
@@ -115,3 +115,6 @@ QUnit.specify "namespace", ->
 
         it "should have correct fourth ram stick pin size", ->
             assert( fourthRAMStickPinSize ).equals(240)
+
+        it "should include namespace prefix at all levels", ->
+            assert( myPC["myPC.classification"] ).equals("PC")

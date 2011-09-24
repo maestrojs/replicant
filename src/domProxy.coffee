@@ -1,67 +1,64 @@
 class DomProxy
     constructor: (target, namespace) ->
-        self = this
-        template = namespace
         @element = target
+        @fqn = if namespace == "" or namespace == undefined
+                @element["id"]
+              else
+                buildFqn namespace, @element["id"]
+        this.crawl this, @fqn, @element, this.crawl, this.addChild
+        this
 
-        self.crawl template, @element, ( namespace, key, child ) ->
-            console.log "#{template} - #{namespace}.#{key}"
-            prefix = template + ".";
-            member = if namespace == template then namespace else namespace.replace prefix, "", "gi"
-            self[member] = domFactory child, member
+    addChild: ( context, namespace, key, child ) ->
+        member = buildFqn namespace, key
+        context[member] = domFactory child, namespace
 
-    coalesce = ( value, defaultValue ) ->
-        if typeof(value) != 'undefined' then value else defaultValue
-
-    crawl: ( namespace, element, callback ) ->
-        id = coalesce element["id"], ""
-        fqn = buildFqn namespace, id
-        if element != @element
-            callback fqn, id, element
+    crawl: ( context, namespace, element, crawl, callback ) ->
         if element.children != undefined and element.children.length > 0
             _(element.children)
                 .chain()
                 .each ( child ) ->
-                        self.crawl fqn, child, callback
+                    callback context, namespace, child["id"], child
+                    crawl context, namespace, child, crawl, callback
 
 class DivProxy extends DomProxy
 
     write: ( path, value ) ->
-        if path == @namespace
+        if path == @fqn
             if _.isObject( value )
-                self.crawl "", value, ( @namespace, key, child ) ->
-                    self.write( buildFqn( @namespace, key ), child )
+                #this[x].write( value[x] ) for x in value
+                for x in value
+                    this[x].write value[x]
             else
                 $(@element).text( value )
         else
-            proxy = self[path]
+            proxy = this[path]
             proxy.write path, value
 
 
 class SpanProxy extends DomProxy
 
     write: ( path, value ) ->
-        if path == @namespace
+        if path == @fqn
             $(@element).text( value )
         else
-            proxy = self[path]
+            proxy = this[path]
             proxy.write path, value
 
 
 class InputProxy extends DomProxy
 
     write: ( path, value ) ->
-        if path == @namespace
+        if path == @fqn
             $(@element).val( value )
         else
-            proxy = self[path]
+            proxy = this[path]
             proxy.write path, value
 
 
 class UlProxy extends DomProxy
 
     write: ( path, value ) ->
-        if path == @namespace
+        if path == @fqn
             children = $(@element).children("li")
             if children.length < value.length
                 li = children[0];
@@ -75,13 +72,13 @@ class UlProxy extends DomProxy
                         self[ fqn + "." + indx ] = newLi[0]
                         indx++
         else
-            proxy = self[path]
+            proxy = this[path]
             proxy.write path, value
 
 class LiProxy extends DomProxy
 
     write: ( path, value ) ->
-        if path == @namespace
+        if path == @fqn
             $(@element).text( value )
 
 domFactory = ( target, namespace ) ->
