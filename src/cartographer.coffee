@@ -20,29 +20,48 @@ Cartographer = (target, namespace) ->
         id = element["id"]
         fqn = createFqn namespace, id
         tag = element.tagName.toUpperCase()
-        console.log tag
         if element.children != undefined and element.children.length > 0
             createChildren = ( crawl( context, fqn, child ) for child in element.children )
             ( html, model, idx ) ->
-                id = if id == "" or id == undefined then idx else id
-                val = if id == fqn then model else model[id]
+                actual = if id == "" then idx else id
+                val = if actual == fqn then model else model[actual]
                 if val instanceof ArrayProxy
-                    index = 0
-                    console.log tag + " - " + val.length
-                    controls = ( ( call( html, val, index += 1) for call in createChildren ) for item in val )
-                    html[tag]( { "id": id }, controls )
+                    list = []
+                    for indx in [0..val.length-1]
+                        list.push ( call( html, val, indx ) for call in createChildren )
+                    makeTag( html, tag, actual, element, list )
                 else
                     controls = (call( html, val ) for call in createChildren )
-                    html[tag]( { "id": id }, controls )
+                    makeTag( html, tag, actual, element, controls )
         else
             ( html, model, idx ) ->
-                id = if id == "" or id == undefined then idx else id
-                val = if id == fqn then model else model[id]
+                actual = if id == "" then idx else id
+                val = if actual == fqn then model else model[actual]
                 x = 0
-                if val instanceof ArrayProxy
-                    html[tag]( { "id": x+=1}, item ) for item in val
+                if val == undefined
+                    if actual == "" or actual == undefined
+                        makeTag( html, tag, "", element, element.textContent )
+                    else
+                        html[tag]()
+                else if val instanceof ArrayProxy
+                    list =[]
+                    for indx in [0..val.length-1]
+                        list.push( makeTag( html, tag, indx, element, val[indx] ) )
+                    list
                 else
-                    html[tag]( { "id": id }, val )
+                    makeTag( html, tag, actual, element, val )
+
+    makeTag = ( html, tag, id, template, val ) ->
+        properties =
+            id: id
+        if template.className
+            properties.class = template.className
+        if val.onclick
+            properties.onclick = val.onclick
+        if val.onblur
+            properties.onblur = val.onblur
+        html[tag]( properties, val )
+
 
     @map = (model) ->
         fn = crawl this, namespace, @element, @map

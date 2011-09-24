@@ -2,10 +2,20 @@ dom = undefined
 $( ->
     doctor =
         name: "The Doctor"
+        onclick: "console.log('I am The Doctor!');"
         companions:
             [
-                { name: "Rose", age: 26 },
-                { name: "Martha", age: 26 }
+                {
+                    name: "Rose",
+                    age: 26,
+                    adventures: ["Bad Wolf","Dalek"]
+                    onclick: "console.log('hi');"
+                },
+                {
+                    name: "Martha",
+                    age: 26,
+                    adventures: ["Family of Blood","Being Human"]
+                }
             ]
         craft:
             name: "Tardis"
@@ -15,8 +25,7 @@ $( ->
 
     #dom = replicant.scan "#theDoctor", ""
     #dom.write "theDoctor", proxy
-
-    console.log cartographer.map( proxy ).toString()
+    
     $( "#theDoctor" ).replaceWith( (cartographer.map proxy).toString() )
 )
 

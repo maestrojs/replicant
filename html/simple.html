@@ -5,16 +5,31 @@
     <script type="text/javascript" src="../ext/underscore-min.js"></script>
     <script type="text/javascript" src="../../lib/replicant.js"></script>
     <script type="text/javascript" src="../html/simple.coffee"></script>
+    <style>
+        .simple
+        {
+            list-style-type: none
+        }
+    </style>
+
 </head>
 <body>
     <div id="theDoctor">
-        <span id="name"></span>
+        <h2 id="name"></h2>
         <ul id="companions">
-            <li>
-                <span id="name"></span>
+            <li class="simple">
+                <h4 id="name"></h4>
                 <span id="age"></span>
+                <ul id="adventures">
+                    <li></li>
+                </ul>
             </li>
         </ul>
+        <h3>Craft</h3>
+        <div id="craft">
+            <label>Name</label>
+            <span id="name"></span>
+        </div>
     </div>
 </body>
 </html>
