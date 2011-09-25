@@ -6,29 +6,49 @@
     <script type="text/javascript" src="../../lib/replicant.js"></script>
     <script type="text/javascript" src="../html/simple.coffee"></script>
     <style>
-        .simple
-        {
+        .simple {
             list-style-type: none
+        }
+        #ingredientList {
+            width: 20em;
+            border: dashed black thin;
+            padding: 1.5em;
+            padding-left: 2.5em;
+        }
+
+        #ingredientList li{
+            width: 18em;
+        }
+
+        #ingredientList #qty {
+
+        }
+        
+        #ingredientList #item {
+            float: right;
         }
     </style>
 
 </head>
 <body>
-    <div id="theDoctor">
-        <h2 id="name"></h2>
-        <ul id="companions">
-            <li class="simple">
-                <h4 id="name"></h4>
-                <span id="age"></span>
-                <ul id="adventures">
-                    <li></li>
-                </ul>
-            </li>
-        </ul>
-        <h3>Craft</h3>
-        <div id="craft">
-            <label>Name</label>
-            <span id="name"></span>
+    <div id="recipe">
+        <h2 id="title"></h2>
+        <div>
+            <label>Description</label>
+            <div id="description"></div>
+        </div>
+        <div>
+            <h3>Ingredients</h3>
+            <ul id="ingredientList">
+                <li>
+                    <b id="qty"></b>
+                    <span id="item"></span>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <h3>Preparation</h3>
+            
         </div>
     </div>
 </body>

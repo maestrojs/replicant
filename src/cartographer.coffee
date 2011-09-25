@@ -24,7 +24,7 @@ Cartographer = (target, namespace) ->
             createChildren = ( crawl( context, fqn, child ) for child in element.children )
             ( html, model, idx ) ->
                 actual = if id == "" then idx else id
-                val = if actual == fqn then model else model[actual]
+                val = if actual == fqn or actual == undefined then model else model[actual]
                 if val instanceof ArrayProxy
                     list = []
                     for indx in [0..val.length-1]
@@ -36,31 +36,36 @@ Cartographer = (target, namespace) ->
         else
             ( html, model, idx ) ->
                 actual = if id == "" then idx else id
-                val = if actual == fqn then model else model[actual]
-                x = 0
-                if val == undefined
-                    if actual == "" or actual == undefined
-                        makeTag( html, tag, "", element, element.textContent )
-                    else
-                        html[tag]()
-                else if val instanceof ArrayProxy
-                    list =[]
-                    for indx in [0..val.length-1]
-                        list.push( makeTag( html, tag, indx, element, val[indx] ) )
-                    list
-                else
+                unless actual
                     makeTag( html, tag, actual, element, val )
+                else
+                    val = if actual == fqn or actual == undefined then model else model[actual]
+                    x = 0
+                    if val == undefined
+                        if actual == "" or actual == undefined
+                            makeTag( html, tag, "", element, element.textContent )
+                        else
+                            html[tag]()
+                    else if val instanceof ArrayProxy
+                        list =[]
+                        for indx in [0..val.length-1]
+                            list.push( makeTag( html, tag, indx, element, val[indx] ) )
+                        list
+                    else
+                        makeTag( html, tag, actual, element, val )
 
     makeTag = ( html, tag, id, template, val ) ->
-        properties =
-            id: id
+        properties = {}
+        if id
+            properties.id = id
         if template.className
             properties.class = template.className
-        if val.onclick
-            properties.onclick = val.onclick
-        if val.onblur
-            properties.onblur = val.onblur
-        html[tag]( properties, val )
+        if val
+            if val.onclick
+                properties.onclick = val.onclick
+            if val.onblur
+                properties.onblur = val.onblur
+        html[tag]( properties, val or= template.textContent )
 
 
     @map = (model) ->
