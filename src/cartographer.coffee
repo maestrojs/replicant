@@ -59,19 +59,23 @@ Cartographer = (target, namespace) ->
     makeTag = ( html, tag, id, template, val, root, model ) ->
         properties = {}
         content = template.textContent
+
         if id
             properties.id = id
+            
+        if val
             content = val
+
         if template.className
             properties.class = template.className
+
         if template.type
             properties.type = template.type
 
-        element = html[tag]( properties, val or properties.textContent )
+        element = html[tag]( properties, content )
 
         if model[id]
             if model[id].onclick
-                console.log model
                 element.onclick = model[id].onclick.bind(root)
             if model[id].onblur
                 element.onblur = model[id].onblur.bind(root)
