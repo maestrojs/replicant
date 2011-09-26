@@ -1,10 +1,6 @@
 Cartographer = (target, namespace) ->
     @element = $(target)[0]
     @map = ->
-    @fqn = if namespace == "" or namespace == undefined
-            @element["id"]
-          else
-            buildFqn namespace, @element["id"]
     @html = DOMBuilder.dom
 
     createFqn = ( namespace, id ) ->
@@ -16,55 +12,47 @@ Cartographer = (target, namespace) ->
             result = "#{namespace}.#{id}"
         result
 
+    @fqn = createFqn namespace, @element["id"]
+
     crawl = ( root, context, namespace, element ) ->
         id = element["id"]
         fqn = createFqn namespace, id
         tag = element.tagName.toUpperCase()
         context = context or root
+
         if element.children != undefined and element.children.length > 0
             createChildren = ( crawl( root, context, fqn, child ) for child in element.children )
+
             ( html, model, idx ) ->
-                actual = if id == "" then idx else id
-                val = if actual == fqn or actual == undefined then model else model[actual]
+                actualId = if id == "" then idx else id
+                val = if actualId == fqn or actualId == undefined then model else model[actualId]
                 if val instanceof ArrayProxy
                     list = []
                     for indx in [0..val.length-1]
                         list.push ( call( html, val, indx ) for call in createChildren )
-                    makeTag( html, tag, actual, element, list, root, model )
+                    makeTag( html, tag, actualId, element, list, root, model )
                 else
                     controls = (call( html, val ) for call in createChildren )
-                    makeTag( html, tag, actual, element, controls, root, model )
+                    makeTag( html, tag, actualId, element, controls, root, model )
         else
             ( html, model, idx ) ->
-                actual = if id == "" then idx else id
-                unless actual
-                    makeTag( html, tag, actual, element, val, root, model )
+                actualId = if id == "" then idx else id
+                
+                val = if actualId == fqn then model else model[actualId]
+                if val instanceof ArrayProxy
+                    list =[]
+                    for indx in [0..val.length-1]
+                        list.push( makeTag( html, tag, indx, element, val[indx], root, model ) )
+                    list
                 else
-                    val = if actual == fqn or actual == undefined then model else model[actual]
-                    x = 0
-                    if val == undefined
-                        if actual == "" or actual == undefined
-                            makeTag( html, tag, "", element, model, root, model )
-                        else
-                            #html[tag]()
-                            makeTag( html, tag, "", element, model, root, model )
-                    else if val instanceof ArrayProxy
-                        list =[]
-                        for indx in [0..val.length-1]
-                            list.push( makeTag( html, tag, indx, element, val[indx], root, model ) )
-                        list
-                    else
-                        makeTag( html, tag, actual, element, val, root, model )
+                    makeTag( html, tag, actualId, element, val, root, model )
 
     makeTag = ( html, tag, id, template, val, root, model ) ->
         properties = {}
-        content = template.textContent
+        content = if val then val else template.textContent
 
         if id
             properties.id = id
-            
-        if val
-            content = val
 
         if template.className
             properties.class = template.className
