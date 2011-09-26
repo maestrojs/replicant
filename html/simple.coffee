@@ -1,13 +1,15 @@
 dom = undefined
 $( ->
     recipe =
+        hurp: () -> console.log "test"
         title: "Munkin Pot Pie"
         description: "Savory monkey under a crispy crust"
         ingredientList: [
             {
-                item:
-                  text: "pastry flour"
-                  onclick: () -> alert("HEY!")
+                item: {
+                    text: "pastry flour"
+                    onclick: () -> @hurp()
+                }
                 qty: "1 cup"
             }
             {
@@ -48,7 +50,7 @@ $( ->
             item: "item"
             btn:
               text: "Add"
-              onclick: "alert('HIBBY-BIBBY!');"
+              onclick: () -> console.log "shuclackity"
         prepTime: "20 minutes"
         cookTime: "45 minutes"
         servings: 10
@@ -78,7 +80,7 @@ $( ->
     #dom = replicant.scan "#theDoctor", ""
     #dom.write "theDoctor", proxy
     
-    $( "#recipe" ).replaceWith( (cartographer.map proxy).toString() )
+    $( "#recipe" ).replaceWith( (cartographer.map proxy) )
 )
 
 #10.15.48.29
