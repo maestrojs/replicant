@@ -6,27 +6,64 @@
     <script type="text/javascript" src="../../lib/replicant.js"></script>
     <script type="text/javascript" src="../html/simple.coffee"></script>
     <style>
+
+        body {
+            font-family: Helvetica;
+            font-size: 1.5em;
+        }
+
         .simple {
             list-style-type: none
         }
+
         #ingredientList {
             width: 20em;
             border: dashed black thin;
             padding: 1.5em;
-            padding-left: 2.5em;
-        }
-
-        #ingredientList li{
-            width: 18em;
         }
 
         #ingredientList #qty {
+            font-weight: bold;
+            padding-right: 1em;
+        }
 
+        #recipe div.segment{
+            display: inline-block;
+            padding: 2em;
         }
-        
-        #ingredientList #item {
-            float: right;
+
+        label {
+            font-size: 1.2em;
+            font-weight: bold;
+            line-height: 2em;
         }
+
+        #description {
+            padding-left: .8em;
+        }
+
+        #segment {
+            display: inline-block;
+        }
+
+        #prep {
+            border: dashed black thin;
+            padding: 1.5em;
+        }
+
+        #step {
+            font-size: 1.6em;
+            font-weight: 600;
+            text-align: right;
+            padding-bottom: 0em;
+        }
+
+        #detail {
+            padding-bottom: 0em;
+            padding-top: .25em;
+            padding-left: .4em;
+        }
+
     </style>
 
 </head>
@@ -37,18 +74,28 @@
             <label>Description</label>
             <div id="description"></div>
         </div>
-        <div>
-            <h3>Ingredients</h3>
-            <ul id="ingredientList">
-                <li>
-                    <b id="qty"></b>
-                    <span id="item"></span>
-                </li>
-            </ul>
+        <div class="segment">
+            <label>Ingredients</label>
+            <table id="ingredientList">
+                <tr>
+                    <td id="qty" ></td>
+                    <td><span id="item"></span></td>
+                </tr>
+            </table>
+            <div id="newIngredient">
+                <label>Quantity</label><input id="quantity" type="text" />
+                <label>Item</label><input id="item" type="text" />
+                <input id="btn" type="button" />
+            </div>
         </div>
-        <div>
-            <h3>Preparation</h3>
-            
+        <div class="segment">
+            <label>Preparation</label>
+            <table id="prep">
+                <tr>
+                    <td id="step"></td>
+                    <td><span id="detail"></span></td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>
