@@ -23,21 +23,22 @@ Cartographer = (target, namespace) ->
         if element.children != undefined and element.children.length > 0
             createChildren = ( crawl( context, root, fqn, child ) for child in element.children )
 
-            ( html, model, idx ) ->
+            ( html, model, parentFqn, idx ) ->
                 actualId = if id == "" then idx else id
+                myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn or actualId == undefined then model else model[actualId]
                 if val instanceof ArrayProxy
                     list = []
                     for indx in [0..val.length-1]
-                        list.push ( call( html, val, indx ) for call in createChildren )
+                        list.push ( call( html, val, myFqn, indx ) for call in createChildren )
                     makeTag( html, tag, element, actualId, list, root, model )
                 else
-                    controls = ( call( html, val ) for call in createChildren )
+                    controls = ( call( html, val, myFqn ) for call in createChildren )
                     makeTag( html, tag, element, actualId, controls, root, model )
         else
-            ( html, model, idx ) ->
+            ( html, model, parentFqn, idx ) ->
                 actualId = if id == "" then idx else id
-                
+                myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn then model else model[actualId]
                 if val instanceof ArrayProxy
                     list =[]
@@ -45,7 +46,9 @@ Cartographer = (target, namespace) ->
                         list.push( makeTag( html, tag, element, indx, val[indx], root, model ) )
                     list
                 else
-                    makeTag( html, tag, element, actualId, val, root, model )
+                    element = makeTag( html, tag, element, actualId, val, root, model )
+                    context[myFqn] = element
+                    element
 
     makeTag = ( html, tag, template, id, val, root, model ) ->
         properties = {}
@@ -73,7 +76,6 @@ Cartographer = (target, namespace) ->
             unless model[id].visible == undefined
                 element.hidden = !model[id].visible
         element
-
 
     @map = (model) ->
         fn = crawl this, model, namespace, @element, @map

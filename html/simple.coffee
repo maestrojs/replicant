@@ -73,8 +73,9 @@ $( ->
           }
         ]
 
+    doNothing = () ->
 
-    proxy = replicant.create recipe, null, null, "recipe"
+    proxy = replicant.create recipe, doNothing, null, "recipe"
     cartographer = replicant.map "#recipe"
 
     #dom = replicant.scan "#theDoctor", ""
