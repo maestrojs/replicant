@@ -14,6 +14,39 @@ Cartographer = (target, namespace) ->
 
     @fqn = createFqn namespace, @element["id"]
 
+    @eventChannel = postal.channel(@fqn + "_events")
+    
+    channel = @eventChannel
+
+    eventHandlers =
+      click: "onclick"
+      dblclick: "ondblclick"
+      mousedown: "onmousedown"
+      mouseup: "onmouseup"
+      mouseove: "onmouseover"
+      mousemove: "onmousemove"
+      mouseout: "onmouseout"
+      keydown: "onkeydown"
+      keypress: "onkeypress"
+      keyup: "onkeyup"
+      select: "onselect"
+      change: "onchange"
+      focus: "onfocus"
+      blur: "onblur"
+      scroll: "onscroll"
+      resize: "onresize"
+      submit: "onsubmit"
+
+    modelTargets =
+      hide: "hidden"
+      value: ["value", "textContent"]
+
+    templateProperties =
+      id: "id"
+      name: "name"
+      class: "className"
+      type: "type"
+
     crawl = ( context, root, namespace, element ) ->
         id = element["id"]
         fqn = createFqn namespace, id
@@ -40,42 +73,44 @@ Cartographer = (target, namespace) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn then model else model[actualId]
-                if val instanceof ArrayProxy
-                    list =[]
-                    for indx in [0..val.length-1]
-                        list.push( makeTag( html, tag, element, indx, val[indx], root, model ) )
-                    list
-                else
-                    element = makeTag( html, tag, element, actualId, val, root, model )
-                    context[myFqn] = element
-                    element
+                element = makeTag( html, tag, element, actualId, val, root, model )
+                setupEvents( model[actualId], root, myFqn, element, context )
+                context[myFqn] = element
+                element
 
     makeTag = ( html, tag, template, id, val, root, model ) ->
         properties = {}
         content = if val then val else template.textContent
-
         if id
             properties.id = id
-
-        if template.className
-            properties.class = template.className
-
-        if template.type
-            properties.type = template.type
-
+        if template
+          copyProperties template, properties, templateProperties
         element = html[tag]( properties, content )
-
         if model[id]
-            if model[id].onclick
-                element.onclick = model[id].onclick.bind(root)
-            if model[id].onblur
-                element.onblur = model[id].onblur.bind(root)
-            if model[id].text
-                element.value = model[id].text
-                element.textContent = model[id].text
-            unless model[id].visible == undefined
-                element.hidden = !model[id].visible
+          copyProperties model[id], element, modelTargets
         element
+
+    setupEvents = ( model, root, fqn, element, context ) ->
+      if model
+        (wireup x, eventHandlers[x], model, root, fqn, element, context ) for x in _.keys(eventHandlers)
+
+    wireup = ( alias, event, model, root, fqn, element, context ) ->
+      handler = model[alias]
+      if handler
+        element[event] = handler.bind(root)
+      else
+        element[event] = () -> context.eventChannel.publish( { control: fqn, event: event, context: context })
+
+    copyProperties = ( source, target, list ) ->
+      ( conditionalCopy source, target, x, list[x] ) for x in _.keys(list)
+
+    conditionalCopy = ( source, target, sourceId, targetId ) ->
+      val = source[sourceId]
+      if val
+        if _.isArray(targetId)
+          ( target[x] = val ) for x in targetId
+        else
+          target[targetId] = val
 
     @map = (model) ->
         fn = crawl this, model, namespace, @element, @map

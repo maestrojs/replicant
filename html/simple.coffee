@@ -1,15 +1,11 @@
 dom = undefined
 $( ->
     recipe =
-        hurp: () -> console.log "test"
         title: "Munkin Pot Pie"
         description: "Savory monkey under a crispy crust"
         ingredientList: [
             {
-                item: {
-                    text: "pastry flour"
-                    onclick: () -> @hurp()
-                }
+                item: "pastry flour"
                 qty: "1 cup"
             }
             {
@@ -50,7 +46,7 @@ $( ->
             item: "item"
             btn:
               text: "Add"
-              onclick: () -> console.log "shuclackity"
+              click: () ->
         prepTime: "20 minutes"
         cookTime: "45 minutes"
         servings: 10
