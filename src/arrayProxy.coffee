@@ -6,6 +6,9 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
   noOp = ->
 
   self["name"] = "ArrayProxy"
+
+  @change_path = (p) ->
+    path = p
   
   addToParent = addChild or noOp
   removeFromParent = removeChild or noOp
@@ -33,9 +36,11 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
       proxy[key] = onProxyOf value,
         -> new ArrayProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
         -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
-        -> _(value).chain().keys().each (k) ->
-            addChildPath "#{fqn}.#{k}", value, k
-            value
+        ->
+          _(value).chain().keys().each (k) ->
+            addChildPath( "#{fqn}.#{k}", value, k )
+          value.change_path( fqn )
+          value
         ,
         -> value
     proxy[key]
@@ -47,14 +52,16 @@ ArrayProxy = (array, onGet, onSet, namespace, addChild, removeChild) ->
 
     Object.defineProperty self, key,
       get: ->
-        value = createProxyFor(false, fqn, key)
-        getCallback fqn, value
+        fqn1 = buildFqn path, key
+        value = createProxyFor(false, fqn1, key)
+        getCallback fqn1, value
         value
       set: (value) ->
+        fqn1 = buildFqn path, key
         old = proxy[key]
         subject[key] = value
-        newValue = createProxyFor(true, fqn, key)
-        setCallback fqn, newValue, old
+        newValue = createProxyFor(true, fqn1, key)
+        setCallback fqn1, newValue, old
 
       configurable: true
       enumerable: true
