@@ -2,6 +2,7 @@ Cartographer = (target, namespace) ->
     @element = $(target)[0]
     @map = ->
     @html = DOMBuilder.dom
+    @template = {}
 
     createFqn = ( namespace, id ) ->
         if id == undefined or id == ""
@@ -15,8 +16,30 @@ Cartographer = (target, namespace) ->
     @fqn = createFqn namespace, @element["id"]
 
     @eventChannel = postal.channel(@fqn + "_events")
-    
+
     channel = @eventChannel
+
+    subscribe = ( context ) ->
+        postal.channel(context.fqn + "_model").subscribe (m) ->
+            if m.event == "wrote"
+                control = context[m.key]
+
+                lastIndex = m.key.lastIndexOf "."
+                parentKey = m.key.substring 0, lastIndex
+                childKey = m.key.substring ( lastIndex + 1 )
+
+                if childKey == "value" and not control
+                    control = context[parentKey]
+                
+                if control
+                    control.value = m.value
+                    control.textContent = m.value
+                else
+                    addName = parentKey + "_add"
+                    newElement = context.template[addName]( childKey, m.parent )
+                    $(context[parentKey]).append newElement
+
+    subscribe( this )
 
     eventHandlers =
       click: "onclick"
@@ -56,38 +79,55 @@ Cartographer = (target, namespace) ->
         if element.children != undefined and element.children.length > 0
             createChildren = ( crawl( context, root, fqn, child ) for child in element.children )
 
-            ( html, model, parentFqn, idx ) ->
+            call = ( html, model, parentFqn, idx ) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn or actualId == undefined then model else model[actualId]
                 if val instanceof ArrayProxy
                     list = []
+                    childFactory = createChildren[0]
+                    context.template[myFqn + "_add"] = ( newIndex, newModel ) ->
+                        childFactory( html, newModel, myFqn, newIndex )
+
                     for indx in [0..val.length-1]
-                        list.push ( call( html, val, myFqn, indx ) for call in createChildren )
-                    makeTag( html, tag, element, actualId, list, root, model )
+                        list.push childFactory( html, val, myFqn, indx )
+                        
+                    childElement = makeTag( context, html, tag, element, myFqn, actualId, list, root, model )
+                    context[myFqn] = childElement
+                    childElement
                 else
                     controls = ( call( html, val, myFqn ) for call in createChildren )
-                    makeTag( html, tag, element, actualId, controls, root, model )
+                    childElement = makeTag( context, html, tag, element, myFqn, actualId, controls, root, model )
+                    context[myFqn] = childElement
+                    childElement
+
+            context.template[fqn] = call
+            call
         else
-            ( html, model, parentFqn, idx ) ->
+            call = ( html, model, parentFqn, idx ) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn then model else model[actualId]
-                element = makeTag( html, tag, element, actualId, val, root, model )
-                setupEvents( model[actualId], root, myFqn, element, context )
-                context[myFqn] = element
-                element
+                childElement = makeTag( context, html, tag, element, myFqn, actualId, val, root, model )
+                context[myFqn] = childElement
+                childElement
 
-    makeTag = ( html, tag, template, id, val, root, model ) ->
+            context.template[fqn] = call
+            call
+
+    makeTag = ( context, html, tag, template, myFqn, id, val, root, model ) ->
         properties = {}
         content = if val then val else template.textContent
-        if id
+        if id or id == 0
             properties.id = id
+        if tag == "INPUT"
+            properties.value = content
         if template
           copyProperties template, properties, templateProperties
         element = html[tag]( properties, content )
         if model[id]
           copyProperties model[id], element, modelTargets
+        setupEvents( model[id], root, myFqn, element, context )
         element
 
     setupEvents = ( model, root, fqn, element, context ) ->
@@ -99,7 +139,9 @@ Cartographer = (target, namespace) ->
       if handler
         element[event] = handler.bind(root)
       else
-        element[event] = () -> context.eventChannel.publish( { control: fqn, event: event, context: context })
+        element[event] = (x) ->
+            context.eventChannel.publish( { control: fqn, event: event, context: context })
+            x.stopPropagation()
 
     copyProperties = ( source, target, list ) ->
       ( conditionalCopy source, target, x, list[x] ) for x in _.keys(list)

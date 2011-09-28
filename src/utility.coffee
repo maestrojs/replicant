@@ -1,11 +1,14 @@
 buildFqn = (path, name) ->
     (if path == "" then name else "#{path}.#{name}")
 
-onProxyOf = ( value, ifArray, ifObject, otherwise ) ->
+onProxyOf = ( value, ifArray, ifObject, absorb, otherwise ) ->
   isObject = _(value).isObject()
   isArray = _(value).isArray()
   isFunction = _(value).isFunction()
-  if not isFunction and ( isObject or isArray )
+  isProxied = value instanceof ObjectProxy or value instanceof ArrayProxy
+  if isProxied
+    absorb()
+  else if not isFunction and ( isObject or isArray )
     if isArray
         ifArray()
     else

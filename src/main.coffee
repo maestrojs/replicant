@@ -1,16 +1,16 @@
 
 replicant =
   default:
-    onGet: ( key, value ) -> console.log "read: #{key} -> #{value}"
-    onSet: ( key, value, old ) -> console.log "wrote: #{key}. #{old} -> #{value}"
+    onGet: ( parent, key, value ) -> console.log "read: #{key} -> #{value}"
+    onSet: ( parent, key, value, old ) -> console.log "wrote: #{key}. #{old} -> #{value}"
     namespace: ""
 
   create: ( target, get, set, namespace ) ->
-    channel = postal.channel namespace
+    channel = postal.channel namespace + "_model"
 
-    onGet = get or= ( key, value ) -> channel.publish { key: key, value: value }
-    onSet = set or= ( key, value, old ) -> channel.publish { key: key, value: value, original: old }
-    namespace = namespace or= this.default.namespace
+    onGet = get or= ( parent, key, value ) -> channel.publish { event: "read", parent: parent, key: key, value: value }
+    onSet = set or= ( parent, key, value, old ) -> channel.publish { event: "wrote", parent: parent, key: key, value: value, original: old }
+    namespace = namespace or= @default.namespace
     proxy = onProxyOf target,
     -> new ArrayProxy( target, onGet, onSet, namespace),
     -> new ObjectProxy( target, onGet, onSet, namespace ),

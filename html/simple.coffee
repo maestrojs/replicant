@@ -43,10 +43,27 @@ $( ->
         ]
         newIngredient:
             quantity: "qty"
-            item: "item"
+            item:
+                value: "item"
+                click: () ->
+                    myItem = this.newIngredient.item
+                    if myItem.value == "item"
+                        myItem.value = ""
+                blur: () ->
+                    myItem = this.newIngredient.item
+                    if myItem.value == ""
+                        myItem.value = "item"
             btn:
-              text: "Add"
+              value: "Add"
               click: () ->
+                list = this.ingredientList
+                newItem = this.newIngredient
+                list.push(
+                    item: newItem.item
+                    qty: newItem.quantity
+                )
+                this.newIngredient.item = ""
+                this.newIngredient.quantity = ""
         prepTime: "20 minutes"
         cookTime: "45 minutes"
         servings: 10
@@ -78,6 +95,8 @@ $( ->
     #dom.write "theDoctor", proxy
     
     $( "#recipe" ).replaceWith( (cartographer.map proxy) )
+
+    postal.channel("recipe_events").subscribe
 )
 
 #10.15.48.29

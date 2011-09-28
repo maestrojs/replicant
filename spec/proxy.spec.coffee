@@ -3,8 +3,8 @@ QUnit.specify "read proxy", ->
 
         getted = []
 
-        onGet = ( x, y ) ->
-            getted.push { property: x, value: y }
+        onGet = ( x, y, z ) ->
+            getted.push { property: y, value: z }
             console.log "Read #{x}"
 
         drWho =

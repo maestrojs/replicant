@@ -33,11 +33,11 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
     removeFromParent fqn
 
   getCallback = (key, value) ->
-    onGet key, value
+    onGet self, key, value
     lastRead.push key
 
   setCallback = (key, newValue, oldValue) ->
-    onSet key, newValue, oldValue
+    onSet self, key, newValue, oldValue
     lastSet.push key
 
   createProxyFor = ( writing, fqn, key ) ->
@@ -46,6 +46,10 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
       proxy[key] = onProxyOf value,
         -> new ArrayProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
         -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
+        -> _(value).chain().keys().each (k) ->
+            addChildPath "#{fqn}.#{k}", value, k
+            value
+        ,
         -> value
     proxy[key]
 
