@@ -1,14 +1,14 @@
-ObjectWrapper = (target, onGet, onSet, namespace, addChild, removeChild) ->
+ObjectWrapper = (target, onEvent, namespace, addChild, removeChild) ->
 
-  proxy = new Proxy( this, target, onGet, onSet, namespace, addChild, removeChild)
+  proxy = new Proxy( this, target, onEvent, namespace, addChild, removeChild)
 
   @change_path = (p) -> proxy.change_path p
   
   this
 
-ArrayWrapper = (target, onGet, onSet, namespace, addChild, removeChild) ->
+ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
 
-  proxy = new Proxy( this, target, onGet, onSet, namespace, addChild, removeChild)
+  proxy = new Proxy( this, target, onEvent, namespace, addChild, removeChild)
 
   @change_path = (p) -> proxy.change_path p
   @push = (value) -> proxy.push value
@@ -16,11 +16,9 @@ ArrayWrapper = (target, onGet, onSet, namespace, addChild, removeChild) ->
   @pop = -> proxy.pop
   @shift = -> proxy.shift
 
-
-
   this
 
-Proxy = (wrapper, target, onGet, onSet, namespace, addChild, removeChild) ->
+Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   proxy = {}
   path = namespace or= ""
@@ -36,30 +34,43 @@ Proxy = (wrapper, target, onGet, onSet, namespace, addChild, removeChild) ->
     subject.push value
     createMemberProxy key
     fqn = buildFqn(path, key)
-    setCallback fqn, wrapper[subject.length - 1], undefined
+    newIndex = subject.length - 1
+    notify fqn, "added", {
+      index: newIndex
+      value: wrapper[newIndex]
+    }
 
   @unshift = (value) ->
     key = subject.length
     subject.push value
     createMemberProxy key
     fqn = buildFqn(path, key)
-    setCallback fqn, wrapper[0], wrapper[1]
+    notify fqn, "added", {
+      index: 0
+      value: wrapper[0]
+    }
 
   @pop = ->
     value = wrapper[subject.length - 1]
     subject.pop()
     key = subject.length - 1
     fqn = buildFqn(path, key)
-    setCallback fqn, undefined, value
     delete wrapper[subject.length]
+    notify fqn, "removed", {
+      index: subject.length
+      value: value
+    }
     value
 
   @shift = ->
     value = wrapper[0]
     subject.shift()
     fqn = buildFqn(path, "0")
-    setCallback 0, undefined, value
     delete wrapper[subject.length]
+    notify fqn, "removed", {
+      index: 0
+      value: value
+    }
     value
 
   addChildPath = (fqn, child, key) ->
@@ -73,18 +84,15 @@ Proxy = (wrapper, target, onGet, onSet, namespace, addChild, removeChild) ->
     delete wrapper[fqn]
     removeFromParent fqn
 
-  getCallback = (key, value) ->
-    onGet wrapper, key, value
-
-  setCallback = (key, newValue, oldValue) ->
-    onSet wrapper, key, newValue, oldValue
+  notify = ( key, event, info ) ->
+    onEvent wrapper, key, event, info
 
   createProxyFor = ( writing, fqn, key ) ->
     value = subject[key]
     if writing or proxy[key] == undefined
       proxy[key] = onProxyOf value,
-        -> new ArrayWrapper( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
-        -> new ObjectWrapper( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
+        -> new ArrayWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
+        -> new ObjectWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
         ->
           _(value).chain().keys().each (k) ->
             addChildPath( "#{fqn}.#{k}", value, k )
@@ -103,7 +111,7 @@ Proxy = (wrapper, target, onGet, onSet, namespace, addChild, removeChild) ->
       get: ->
         fqn1 = buildFqn path, key
         value = createProxyFor(false, fqn1, key)
-        getCallback fqn1, value
+        notify fqn1, "read", { value: value }
         value
 
       set: (value) ->
@@ -111,7 +119,7 @@ Proxy = (wrapper, target, onGet, onSet, namespace, addChild, removeChild) ->
         old = proxy[key]
         subject[key] = value
         newValue = createProxyFor(true, fqn1, key)
-        setCallback fqn1, newValue, old
+        notify fqn1, "wrote", { value: value, previous: old }
 
       configurable: true
       enumerable: true

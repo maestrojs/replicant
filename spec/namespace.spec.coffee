@@ -99,7 +99,7 @@ QUnit.specify "namespace", ->
                     vendor: "Western Digital"
                 }
             ]
-        myPC = replicant.create myPC, null, null, "myPC"
+        myPC = replicant.create myPC, null, "myPC"
 
         myPC["myPC.storage.1.capacity"] = "1 TB"
         myPC["myPC.memory.1.sticks.1.pin"] = 240

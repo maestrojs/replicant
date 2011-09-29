@@ -21,7 +21,7 @@ Cartographer = (target, namespace) ->
 
     subscribe = ( context ) ->
         postal.channel(context.fqn + "_model").subscribe (m) ->
-            if m.event == "wrote"
+            if m.event == "wrote" or m.event == "added"
                 control = context[m.key]
 
                 lastIndex = m.key.lastIndexOf "."
@@ -32,8 +32,9 @@ Cartographer = (target, namespace) ->
                     control = context[parentKey]
                 
                 if control
-                    control.value = m.value
-                    control.textContent = m.value
+                    control.value = m.info.value
+                    if control.children <= 1
+                      control.textContent = m.info.value
                 else
                     addName = parentKey + "_add"
                     newElement = context.template[addName]( childKey, m.parent )
@@ -62,11 +63,18 @@ Cartographer = (target, namespace) ->
 
     modelTargets =
       hide: "hidden"
+      title: "title"
       value: ["value", "textContent"]
+
+    modelTargetsForCollections =
+      hide: "hidden"
+      title: "title"
+      value: "value"
 
     templateProperties =
       id: "id"
       name: "name"
+      title: "title"
       class: "className"
       type: "type"
 
@@ -83,14 +91,16 @@ Cartographer = (target, namespace) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn or actualId == undefined then model else model[actualId]
-                if val instanceof ArrayWrapper
+                collection = if val instanceof ArrayWrapper then val else val.items
+                if collection and collection instanceof ArrayWrapper
                     list = []
                     childFactory = createChildren[0]
                     context.template[myFqn + "_add"] = ( newIndex, newModel ) ->
                         childFactory( html, newModel, myFqn, newIndex )
 
-                    for indx in [0..val.length-1]
-                        list.push childFactory( html, val, myFqn, indx )
+                    for indx in [0..collection.length-1]
+                        #list.push childFactory( html, collection, myFqn, indx )
+                        list.push ( call( html, collection, myFqn, indx ) for call in createChildren )
                         
                     childElement = makeTag( context, html, tag, element, myFqn, actualId, list, root, model )
                     context[myFqn] = childElement
@@ -118,15 +128,24 @@ Cartographer = (target, namespace) ->
     makeTag = ( context, html, tag, template, myFqn, id, val, root, model ) ->
         properties = {}
         content = if val then val else template.textContent
+        element = {}
         if id or id == 0
             properties.id = id
-        if tag == "INPUT"
-            properties.value = content
+
         if template
           copyProperties template, properties, templateProperties
-        element = html[tag]( properties, content )
+
+        if tag == "INPUT"
+            properties.value = content
+            element = html[tag]( properties )
+        else
+          element = html[tag]( properties, content )
+          
         if model[id]
-          copyProperties model[id], element, modelTargets
+          if val instanceof Array
+            copyProperties template, properties, modelTargetsForCollections
+          else
+            copyProperties model[id], element, modelTargets
         setupEvents( model[id], root, myFqn, element, context )
         element
 
@@ -137,10 +156,14 @@ Cartographer = (target, namespace) ->
     wireup = ( alias, event, model, root, fqn, element, context ) ->
       handler = model[alias]
       if handler
-        element[event] = handler.bind(root)
+        handlerProxy = (x) -> handler.apply(
+          model,
+          [root, { control: fqn, event: event, context: context, info: x } ]
+        )
+        element[event] = handlerProxy
       else
         element[event] = (x) ->
-            context.eventChannel.publish( { control: fqn, event: event, context: context })
+            context.eventChannel.publish( { control: fqn, event: event, context: context, info: x } )
             x.stopPropagation()
 
     copyProperties = ( source, target, list ) ->

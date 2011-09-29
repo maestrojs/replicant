@@ -3,8 +3,8 @@ QUnit.specify "read proxy", ->
 
         getted = []
 
-        onGet = ( x, y, z ) ->
-            getted.push { property: y, value: z }
+        onEvent = ( w, x, y, z ) ->
+            getted.push { property: x, value: z.value}
             console.log "Read #{x}"
 
         drWho =
@@ -22,7 +22,7 @@ QUnit.specify "read proxy", ->
             
         describe "member access", ->
 
-            drWho = replicant.create drWho, onGet
+            drWho = replicant.create drWho, onEvent
             
             #before ->
             name = drWho.name

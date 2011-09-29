@@ -46,24 +46,22 @@ $( ->
             item:
                 value: "item"
                 click: () ->
-                    myItem = this.newIngredient.item
-                    if myItem.value == "item"
-                        myItem.value = ""
+                    if this.value == "item"
+                        this.value = ""
                 blur: () ->
-                    myItem = this.newIngredient.item
-                    if myItem.value == ""
-                        myItem.value = "item"
+                    if this.value == ""
+                        this.value = "item"
             btn:
               value: "Add"
-              click: () ->
-                list = this.ingredientList
-                newItem = this.newIngredient
+              click: (root) ->
+                list = root.ingredientList
+                newItem = root.newIngredient
                 list.push(
                     item: newItem.item
                     qty: newItem.quantity
                 )
-                this.newIngredient.item = ""
-                this.newIngredient.quantity = ""
+                this.item = ""
+                this.quantity = ""
         prepTime: "20 minutes"
         cookTime: "45 minutes"
         servings: 10
@@ -85,10 +83,23 @@ $( ->
             detail: " until the monkey stops screaming."
           }
         ]
+        rating: "none"
+        ratings:
+          value: "Good"
+          items: [
+            "Yuk city",
+            "Ok",
+            "Good",
+            "YUMTOWN!"
+          ]
+        dumpus:
+          click: (root) ->
+            console.log JSON.stringify(root)
+          value: "Click for view model state"
 
     doNothing = () ->
 
-    proxy = replicant.create recipe, doNothing, null, "recipe"
+    proxy = replicant.create recipe, null, "recipe"
     cartographer = replicant.map "#recipe"
 
     #dom = replicant.scan "#theDoctor", ""

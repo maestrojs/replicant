@@ -4,7 +4,8 @@ QUnit.specify "write proxy", ->
         setted = []
 
         onSet = ( w, x, y, z ) ->
-            setted.push { property: x, value: y, old: z }
+            if y == "wrote" or y == "added"
+              setted.push { property: x, value: z.value, old: z.previous }
 
         theFellowship =
             title: ""
@@ -15,12 +16,12 @@ QUnit.specify "write proxy", ->
                 }
             ]
 
-        proxy = replicant.create theFellowship, null, onSet
+        proxy = replicant.create theFellowship, onSet
         proxy.title = "Of The Ring"
         proxy.humans.push { name: "Aragorn", char_class: "Ranger" }
         proxy.humans[0].char_class = "Hero"
 
-        subProxy = replicant.create { name: "Faromir", char_class: "Warrior" }, null, onSet
+        subProxy = replicant.create { name: "Faromir", char_class: "Warrior" }, onSet
         proxy.humans.push subProxy
 
         #proxy["humans.2.char_class"] = "Hero"
@@ -32,6 +33,9 @@ QUnit.specify "write proxy", ->
 
         it "should expand collection", ->
             assert( proxy.humans.length ).equals( 3 )
+
+        it "should have changed sub proxy property", ->
+            assert( proxy.humans[2].char_class).equals( "Hero" )
 
         it "should capture write of nested collection element property", ->
             assert( _.any setted, (x) -> x.property == "humans.0.char_class" ).isTrue()

@@ -16,7 +16,7 @@ QUnit.specify "array", ->
         test.dummy.list[2].three = 8
 
         it "should replace 3rd item", ->
-            assert( test.dummy.list[2].three == 8).isTrue()
+            assert( test.dummy.list[2].three ).equals( 8 )
 
         it "should have added 4", ->
-            assert( test.dummy.list[3].four == 4 ).isTrue()
+            assert( test.dummy.list[3].four ).equals( 4 )
