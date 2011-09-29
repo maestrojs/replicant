@@ -6,7 +6,6 @@
 ###
 
 ###import "utility.coffee" ####
-###import "arrayProxy.coffee" ####
 ###import "objectProxy.coffee" ####
 ###import "cartographer.coffee" ###
 ###import "main.coffee" ###

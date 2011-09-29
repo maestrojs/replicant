@@ -12,8 +12,9 @@ replicant =
     onSet = set or= ( parent, key, value, old ) -> channel.publish { event: "wrote", parent: parent, key: key, value: value, original: old }
     namespace = namespace or= @default.namespace
     proxy = onProxyOf target,
-    -> new ArrayProxy( target, onGet, onSet, namespace),
-    -> new ObjectProxy( target, onGet, onSet, namespace ),
+    -> new ArrayWrapper( target, onGet, onSet, namespace),
+    -> new ObjectWrapper( target, onGet, onSet, namespace ),
+    -> target
     -> target
 
     postal.channel(namespace + "_events").subscribe (m) ->

@@ -1,54 +1,90 @@
-ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
-  self = this
-  lastRead = []
-  lastSet = []
+ObjectWrapper = (target, onGet, onSet, namespace, addChild, removeChild) ->
+
+  proxy = new Proxy( this, target, onGet, onSet, namespace, addChild, removeChild)
+
+  @change_path = (p) -> proxy.change_path p
+  
+  this
+
+ArrayWrapper = (target, onGet, onSet, namespace, addChild, removeChild) ->
+
+  proxy = new Proxy( this, target, onGet, onSet, namespace, addChild, removeChild)
+
+  @change_path = (p) -> proxy.change_path p
+  @push = (value) -> proxy.push value
+  @unshift = (value) -> proxy.unshift value
+  @pop = -> proxy.pop
+  @shift = -> proxy.shift
+
+
+
+  this
+
+Proxy = (wrapper, target, onGet, onSet, namespace, addChild, removeChild) ->
+
   proxy = {}
   path = namespace or= ""
-  noOp = ->
-  addToParent = addChild #or addChildPath
-  removeFromParent = removeChild #or removeChildPath
+  addToParent = addChild or () ->
+  removeFromParent = removeChild or () ->
+  subject = target
   
-  lastAccessed = ->
-    list = lastRead
-    lastRead = []
-    list
-
-  lastWritten = ->
-    list = lastSet
-    lastSet = []
-    list
-
-  self["name"] = "ObjectProxy"
-
   @change_path = (p) ->
     path = p
 
+  @push = (value) ->
+    key = subject.length
+    subject.push value
+    createMemberProxy key
+    fqn = buildFqn(path, key)
+    setCallback fqn, wrapper[subject.length - 1], undefined
+
+  @unshift = (value) ->
+    key = subject.length
+    subject.push value
+    createMemberProxy key
+    fqn = buildFqn(path, key)
+    setCallback fqn, wrapper[0], wrapper[1]
+
+  @pop = ->
+    value = wrapper[subject.length - 1]
+    subject.pop()
+    key = subject.length - 1
+    fqn = buildFqn(path, key)
+    setCallback fqn, undefined, value
+    delete wrapper[subject.length]
+    value
+
+  @shift = ->
+    value = wrapper[0]
+    subject.shift()
+    fqn = buildFqn(path, "0")
+    setCallback 0, undefined, value
+    delete wrapper[subject.length]
+    value
+
   addChildPath = (fqn, child, key) ->
-    Object.defineProperty self, fqn,
+    Object.defineProperty wrapper, fqn,
       get: -> child[key]
       set: (value) -> child[key] = value
       configurable: true
-    if addToParent
-        addToParent fqn, child, key
+    addToParent fqn, child, key
 
   removeChildPath = (fqn) ->
-    delete self[fqn]
+    delete wrapper[fqn]
     removeFromParent fqn
 
   getCallback = (key, value) ->
-    onGet self, key, value
-    lastRead.push key
+    onGet wrapper, key, value
 
   setCallback = (key, newValue, oldValue) ->
-    onSet self, key, newValue, oldValue
-    lastSet.push key
+    onSet wrapper, key, newValue, oldValue
 
   createProxyFor = ( writing, fqn, key ) ->
     value = subject[key]
     if writing or proxy[key] == undefined
       proxy[key] = onProxyOf value,
-        -> new ArrayProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
-        -> new ObjectProxy( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
+        -> new ArrayWrapper( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
+        -> new ObjectWrapper( value, onGet, onSet, fqn, addChildPath, removeChildPath ),
         ->
           _(value).chain().keys().each (k) ->
             addChildPath( "#{fqn}.#{k}", value, k )
@@ -58,15 +94,12 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
         -> value
     proxy[key]
 
-  createMemberProxy = (self, proxy, key) ->
+  createMemberProxy = (key) ->
     fqn = buildFqn path, key
-    if addToParent
-        addToParent fqn, self, key
-    else
-        addChildPath fqn, self, key
+    addChildPath fqn, wrapper, key
     createProxyFor(false, fqn, key)
     
-    Object.defineProperty self, key,
+    Object.defineProperty wrapper, key,
       get: ->
         fqn1 = buildFqn path, key
         value = createProxyFor(false, fqn1, key)
@@ -83,11 +116,11 @@ ObjectProxy = (subject, onGet, onSet, namespace, addChild, removeChild) ->
       configurable: true
       enumerable: true
 
-   Object.defineProperty self, "length",
+  Object.defineProperty wrapper, "length",
     get: ->
-        proxy.length
+        subject.length
 
-  _(subject).chain().keys().each (key) ->
-    createMemberProxy self, proxy, key
+  _(target).chain().keys().each (key) ->
+    createMemberProxy key
 
-  self
+  this

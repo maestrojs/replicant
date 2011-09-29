@@ -83,7 +83,7 @@ Cartographer = (target, namespace) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
                 val = if actualId == fqn or actualId == undefined then model else model[actualId]
-                if val instanceof ArrayProxy
+                if val instanceof ArrayWrapper
                     list = []
                     childFactory = createChildren[0]
                     context.template[myFqn + "_add"] = ( newIndex, newModel ) ->

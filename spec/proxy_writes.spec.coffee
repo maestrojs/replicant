@@ -31,7 +31,7 @@ QUnit.specify "write proxy", ->
             assert( _.any setted, (x) -> x.property == "title" ).isTrue()
 
         it "should expand collection", ->
-            assert( proxy.humans.length == 3 ).isTrue()
+            assert( proxy.humans.length ).equals( 3 )
 
         it "should capture write of nested collection element property", ->
             assert( _.any setted, (x) -> x.property == "humans.0.char_class" ).isTrue()
