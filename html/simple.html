@@ -10,7 +10,7 @@
 
         body {
             font-family: Helvetica;
-            font-size: 1.5em;
+            font-size: 1.2em;
         }
 
         .simple {
@@ -21,6 +21,11 @@
             width: 20em;
             border: dashed black thin;
             padding: 1.5em;
+        }
+
+        .ingredient td{
+            height: 100px;
+            width: 200px;
         }
 
         #ingredientList #qty {
@@ -75,8 +80,8 @@
 
 </head>
 <body>
-    <div id="recipe">
-        <h2 id="title"></h2>
+    <div id="recipe" class="test">
+        <h2 id="title" class="test"></h2>
         <div>
             <label>Description</label>
             <div id="description"></div>
@@ -84,11 +89,12 @@
         <div class="segment">
             <label>Ingredients</label>
             <table id="ingredientList">
-                <tr>
-                    <td id="qty" ></td>
+                <tr class="ingredient">
+                    <td id="qty"></td>
                     <td>
                         <span id="item"></span>
                     </td>
+                    <td class="buttonDiv"><input type="button" id="showbtn" /></td>
                 </tr>
             </table>
             <div id="newIngredient">

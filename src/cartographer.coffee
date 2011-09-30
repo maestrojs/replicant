@@ -21,24 +21,29 @@ Cartographer = (target, namespace) ->
 
     subscribe = ( context ) ->
         postal.channel(context.fqn + "_model").subscribe (m) ->
-            if m.event == "wrote" or m.event == "added"
-                control = context[m.key]
 
-                lastIndex = m.key.lastIndexOf "."
-                parentKey = m.key.substring 0, lastIndex
-                childKey = m.key.substring ( lastIndex + 1 )
+            if m.event != "read"
+              control = context[m.key]
 
-                if childKey == "value" and not control
-                    control = context[parentKey]
-                
-                if control
-                    control.value = m.info.value
-                    if control.children <= 1
-                      control.textContent = m.info.value
-                else
-                    addName = parentKey + "_add"
-                    newElement = context.template[addName]( childKey, m.parent )
-                    $(context[parentKey]).append newElement
+              lastIndex = m.key.lastIndexOf "."
+              parentKey = m.key.substring 0, lastIndex
+              childKey = m.key.substring ( lastIndex + 1 )
+              target = "value"
+
+              if childKey == "value" or not control
+                  control = context[parentKey]
+                  target = childKey
+
+              if m.event == "wrote"
+                  if control
+                      #control[target] = m.info.value
+                      conditionalCopy m.info, control, "value", modelTargets[target]
+                      if control.children <= 1
+                        control.textContent = m.info.value
+              else if m.event == "added"
+                addName = parentKey + "_add"
+                newElement = context.template[addName]( childKey, m.parent )
+                $(context[parentKey]).append newElement
 
     subscribe( this )
 
@@ -47,7 +52,7 @@ Cartographer = (target, namespace) ->
       dblclick: "ondblclick"
       mousedown: "onmousedown"
       mouseup: "onmouseup"
-      mouseove: "onmouseover"
+      mouseover: "onmouseover"
       mousemove: "onmousemove"
       mouseout: "onmouseout"
       keydown: "onkeydown"
@@ -75,8 +80,10 @@ Cartographer = (target, namespace) ->
       id: "id"
       name: "name"
       title: "title"
-      class: "className"
+      className: "class"
       type: "type"
+      width: "width"
+      height: "height"
 
     crawl = ( context, root, namespace, element ) ->
         id = element["id"]
@@ -164,14 +171,14 @@ Cartographer = (target, namespace) ->
       else
         element[event] = (x) ->
             context.eventChannel.publish( { control: fqn, event: event, context: context, info: x } )
-            x.stopPropagation()
+            #x.stopPropagation()
 
     copyProperties = ( source, target, list ) ->
       ( conditionalCopy source, target, x, list[x] ) for x in _.keys(list)
 
     conditionalCopy = ( source, target, sourceId, targetId ) ->
       val = source[sourceId]
-      if val
+      if val != undefined and val != ""
         if _.isArray(targetId)
           ( target[x] = val ) for x in targetId
         else

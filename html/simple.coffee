@@ -1,45 +1,34 @@
 dom = undefined
 $( ->
+
+    ingredient = ( item, qty ) ->
+        mouseover: () -> this.showbtn.hide = false
+        mouseout: () -> this.showbtn.hide = true
+        item: item
+        qty: qty
+        showbtn:
+          value: "edit"
+          hide: true
+          click: (p, x) ->
+            console.log this.edit.hide
+        edit:
+          hide: true
+          item: item
+          qty: qty
+
     recipe =
         title: "Munkin Pot Pie"
         description: "Savory monkey under a crispy crust"
         ingredientList: [
-            {
-                item: "pastry flour"
-                qty: "1 cup"
-            }
-            {
-                item: "shortening"
-                qty: "1/4 cup"
-            }
-            {
-                item: "milk"
-                qty: "1/2 cup"
-            }
-            {
-                item: "egg"
-                qty: "1 large"
-            }
-            {
-                item: "adult monkey"
-                qty: "1 lb"
-            }
-            {
-                item: "carrots"
-                qty: "2 cups diced"
-            }
-            {
-                item: "corn"
-                qty: "1 cup"
-            }
-            {
-                item: "celery"
-                qty: "1 cup diced"
-            }
-            {
-                item: "banana"
-                qty: "1 sliced"
-            }
+            new ingredient "pastry flour", "1 cup"
+            new ingredient "shortening", "1/4 cup"
+            new ingredient "milk", "1/2 cup"
+            new ingredient "egg", "1 large"
+            new ingredient "adult monkey", "1 lb"
+            new ingredient "carrots", "2 cups diced"
+            new ingredient "corn", "1 cup"
+            new ingredient "celery", "1 cup diced"
+            new ingredient "banana", "1 sliced"
         ]
         newIngredient:
             quantity: "qty"
@@ -57,9 +46,8 @@ $( ->
                 list = root.ingredientList
                 newItem = root.newIngredient
                 list.push(
-                    item: newItem.item
-                    qty: newItem.quantity
-                )
+                    new ingredient newItem.item, newItem.quantity
+                  )
                 this.item = ""
                 this.quantity = ""
         prepTime: "20 minutes"
