@@ -18,19 +18,37 @@
         }
 
         #ingredientList {
-            width: 20em;
+            
             border: dashed black thin;
             padding: 1.5em;
+            width: 22em;
         }
 
         .ingredient td{
-            height: 100px;
-            width: 200px;
+            height: 1.6em;
+            width: 150px;
         }
 
         #ingredientList #qty {
             font-weight: bold;
             padding-right: 1em;
+            width: 8em;
+            display: inline-block;
+        }
+
+        #ingredientList #item {
+            padding-right: 1em;
+            width: 8em;
+            display: inline-block;
+        }
+
+        #ingredientList[type=button] {
+            width: 3em;
+            display: inline-block;
+        }
+
+        #ingredientList .ingredient {
+            height: 1.6em;
         }
 
         #recipe div.segment{
@@ -88,15 +106,21 @@
         </div>
         <div class="segment">
             <label>Ingredients</label>
-            <table id="ingredientList">
-                <tr class="ingredient">
-                    <td id="qty"></td>
-                    <td>
+            <div id="ingredientList">
+                <div class="ingredient">
+                    <div id="display">
+                        <span id="qty"></span>
                         <span id="item"></span>
-                    </td>
-                    <td class="buttonDiv"><input type="button" id="showbtn" /></td>
-                </tr>
-            </table>
+                        <input type="button" id="showbtn" />
+                    </div>
+                    <div id="edit">
+                        <span id="qty"></span>
+                        <span id="item"></span>
+                        <input type="button" id="okbtn" />
+                        <input type="button" id="cancelbtn" />
+                    </div>
+                </div>
+            </div>
             <div id="newIngredient">
                 <form>
                     <label>Quantity</label><input id="quantity" type="text" />

@@ -97,8 +97,8 @@ Cartographer = (target, namespace) ->
             call = ( html, model, parentFqn, idx ) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
-                val = if actualId == fqn or actualId == undefined then model else model[actualId]
-                collection = if val instanceof ArrayWrapper then val else val.items
+                val = if actualId == fqn or actualId == undefined then model else model?[actualId]
+                collection = if val instanceof ArrayWrapper then val else val?.items
                 if collection and collection instanceof ArrayWrapper
                     list = []
                     childFactory = createChildren[0]
@@ -124,7 +124,7 @@ Cartographer = (target, namespace) ->
             call = ( html, model, parentFqn, idx ) ->
                 actualId = if id == "" then idx else id
                 myFqn = createFqn parentFqn, actualId
-                val = if actualId == fqn then model else model[actualId]
+                val = if actualId == fqn then model else model?[actualId]
                 childElement = makeTag( context, html, tag, element, myFqn, actualId, val, root, model )
                 context[myFqn] = childElement
                 childElement
@@ -148,12 +148,12 @@ Cartographer = (target, namespace) ->
         else
           element = html[tag]( properties, content )
           
-        if model[id]
+        if model?[id]
           if val instanceof Array
-            copyProperties template, properties, modelTargetsForCollections
+            copyProperties model[id], element, modelTargetsForCollections
           else
             copyProperties model[id], element, modelTargets
-        setupEvents( model[id], root, myFqn, element, context )
+        setupEvents( model?[id], root, myFqn, element, context )
         element
 
     setupEvents = ( model, root, fqn, element, context ) ->
