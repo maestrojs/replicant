@@ -2,29 +2,55 @@ dom = undefined
 
 Ingredient = ( item, qty ) ->
 
-    mouseover: () ->
+    hovered: false
+    click: (r,x) -> JSON.stringify console.log.info
+    mouseover: (r,x) ->
         @display.showbtn.hide = false
-    mouseout: () ->
-        @display.showbtn.hide = true
+        x.control.className = "ingredient ingredient-highlight"
+        this.display.showbtn.class = "button inline-block"
+        @hovered = true
+    mouseout: (r,y) ->
+        @hovered = false
+        window.setTimeout ((x) ->
+            if not x.hovered
+                x.display.showbtn.hide = true
+                x.display.showbtn.class = "button"
+                y.control.className = "ingredient"
+            )
+            , 100
+            , this
     display:
+        hide: false
         item: item
         qty: qty
         showbtn:
+            class: "button"
             value: "edit"
             hide: true
             click: (p, x) ->
-                console.log "hide"
+                editor = this.ancestors[1].edit
+                display = this.ancestors[0]
+                display.hide = true
+                editor.hide = false
     edit:
         item: item
         qty: qty
         okbtn:
             value: "ok"
             click: (p, x) ->
-                console.log "ok"
+                editor = this.ancestors[0]
+                display = this.ancestors[1].display
+                editor.hide = true
+                display.hide = false
+                display.item = editor.item
+                display.qty = editor.qty
         cancelbtn:
             value: "cancel"
             click: (p, x) ->
-                console.log "ok"
+                editor = this.ancestors[0]
+                display = this.ancestors[1].display
+                editor.hide = true
+                display.hide = false
         hide: true
 
 $( ->
@@ -44,15 +70,12 @@ $( ->
             new Ingredient "banana", "1 sliced"
         ]
         newIngredient:
-            quantity: "qty"
+            quantity:
+                value: ""
+                click: (x, y) -> y.control.select()
             item:
-                value: "item"
-                click: () ->
-                    if this.value == "item"
-                        this.value = ""
-                blur: () ->
-                    if this.value == ""
-                        this.value = "item"
+                value: ""
+                click: (x, y) -> y.control.select()
             btn:
               value: "Add"
               click: (root) ->
@@ -61,8 +84,8 @@ $( ->
                 list.push(
                     new Ingredient newItem.item, newItem.quantity
                   )
-                this.item = ""
-                this.quantity = ""
+                this.ancestors[0].item = ""
+                this.ancestors[0].quantity = ""
         prepTime: "20 minutes"
         cookTime: "45 minutes"
         servings: 10

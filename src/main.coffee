@@ -15,7 +15,7 @@ replicant =
 
     postal.channel(namespace + "_events").subscribe (m) ->
       if m.event == "onchange"
-        proxy[m.control] = m.context[m.control].value
+        proxy[m.id] = m.control.value
 
     proxy
 

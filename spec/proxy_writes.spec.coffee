@@ -4,8 +4,8 @@ QUnit.specify "write proxy", ->
         setted = []
 
         onSet = ( w, x, y, z ) ->
-            if y == "wrote" or y == "added"
-              setted.push { property: x, value: z.value, old: z.previous }
+            #if y == "wrote" or y == "added"
+            setted.push { property: x, value: z.value, old: z.previous }
 
         theFellowship =
             title: ""
@@ -24,8 +24,8 @@ QUnit.specify "write proxy", ->
         subProxy = replicant.create { name: "Faromir", char_class: "Warrior" }, onSet
         proxy.humans.push subProxy
 
-        #proxy["humans.2.char_class"] = "Hero"
         proxy.humans[2].char_class = "Hero"
+        proxy["humans.2.char_class"] = "Dead Guy :("
         console.log JSON.stringify setted
 
         it "should capture title write", ->
@@ -35,7 +35,7 @@ QUnit.specify "write proxy", ->
             assert( proxy.humans.length ).equals( 3 )
 
         it "should have changed sub proxy property", ->
-            assert( proxy.humans[2].char_class).equals( "Hero" )
+            assert( proxy.humans[2].char_class).equals( "Dead Guy :(" )
 
         it "should capture write of nested collection element property", ->
             assert( _.any setted, (x) -> x.property == "humans.0.char_class" ).isTrue()

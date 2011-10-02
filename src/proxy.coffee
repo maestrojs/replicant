@@ -25,6 +25,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   addToParent = addChild or () ->
   removeFromParent = removeChild or () ->
   subject = target
+  ancestors = []
   
   @change_path = (p) ->
     path = p
@@ -78,6 +79,8 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
       get: -> child[key]
       set: (value) -> child[key] = value
       configurable: true
+    if child != wrapper and not _.any( child.ancestors, (x) -> x == wrapper )
+        child.ancestors.push wrapper
     addToParent fqn, child, key
 
   removeChildPath = (fqn) ->
@@ -127,6 +130,14 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   Object.defineProperty wrapper, "length",
     get: ->
         subject.length
+        
+  Object.defineProperty wrapper, "ancestors",
+    get: ->
+        ancestors
+    set: (x) ->
+        ancestors = x
+    enumerable: false
+    configurable: true
 
   _(target).chain().keys().each (key) ->
     createMemberProxy key

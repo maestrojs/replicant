@@ -21,12 +21,15 @@
             
             border: dashed black thin;
             padding: 1.5em;
-            width: 22em;
+            width: 24em;
         }
 
-        .ingredient td{
-            height: 1.6em;
-            width: 150px;
+        .ingredient {
+            padding: 10px 10px 5px 15px;
+        }
+
+        .ingredient-highlight {
+            background-color: #D2E0E6;
         }
 
         #ingredientList #qty {
@@ -36,14 +39,32 @@
             display: inline-block;
         }
 
-        #ingredientList #item {
+        #ingredientList span {
             padding-right: 1em;
             width: 8em;
             display: inline-block;
         }
 
+        #ingredientList input[type=text] {
+            padding-right: 1em;
+            width: 10em;
+            display: inline-block;
+        }
+
         #ingredientList[type=button] {
             width: 3em;
+            font-size: 2.5em;
+            display: inline-block;
+        }
+        
+        .button {
+            font-weight: bold;
+            border: black solid 3px;
+            width: 3em;
+            text-align: center;
+        }
+
+        .inline-block {
             display: inline-block;
         }
 
@@ -108,14 +129,15 @@
             <label>Ingredients</label>
             <div id="ingredientList">
                 <div class="ingredient">
+                    No Ingredients :(
                     <div id="display">
                         <span id="qty"></span>
                         <span id="item"></span>
-                        <input type="button" id="showbtn" />
+                        <div id="showbtn" class="button" ></div>
                     </div>
                     <div id="edit">
-                        <span id="qty"></span>
-                        <span id="item"></span>
+                        <input type="text" id="qty" />
+                        <input type="text" id="item" />
                         <input type="button" id="okbtn" />
                         <input type="button" id="cancelbtn" />
                     </div>

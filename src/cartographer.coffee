@@ -36,10 +36,8 @@ Cartographer = (target, namespace) ->
 
               if m.event == "wrote"
                   if control
-                      #control[target] = m.info.value
                       conditionalCopy m.info, control, "value", modelTargets[target]
-                      if control.children <= 1
-                        control.textContent = m.info.value
+
               else if m.event == "added"
                 addName = parentKey + "_add"
                 newElement = context.template[addName]( childKey, m.parent )
@@ -69,12 +67,14 @@ Cartographer = (target, namespace) ->
     modelTargets =
       hide: "hidden"
       title: "title"
+      class: "className"
       value: ["value", "textContent"]
 
     modelTargetsForCollections =
       hide: "hidden"
       title: "title"
       value: "value"
+      class: "className"
 
     templateProperties =
       id: "id"
@@ -143,7 +143,8 @@ Cartographer = (target, namespace) ->
           copyProperties template, properties, templateProperties
 
         if tag == "INPUT"
-            properties.value = content
+            if not _.isObject content
+                properties.value = content
             element = html[tag]( properties )
         else
           element = html[tag]( properties, content )
@@ -165,24 +166,26 @@ Cartographer = (target, namespace) ->
       if handler
         handlerProxy = (x) -> handler.apply(
           model,
-          [root, { control: fqn, event: event, context: context, info: x } ]
+          [root, { id: fqn, control: context[fqn], event: event, context: context, info: x } ]
         )
         element[event] = handlerProxy
       else
         element[event] = (x) ->
-            context.eventChannel.publish( { control: fqn, event: event, context: context, info: x } )
-            #x.stopPropagation()
+            if event == "onchange"
+                x.stopPropagation()
+            context.eventChannel.publish( { id: fqn, model: model, control: context[fqn], event: event, context: context, info: x } )
 
     copyProperties = ( source, target, list ) ->
       ( conditionalCopy source, target, x, list[x] ) for x in _.keys(list)
 
     conditionalCopy = ( source, target, sourceId, targetId ) ->
       val = source[sourceId]
-      if val != undefined and val != ""
+      if val != undefined and ( val != "" and targetId != "value" )
         if _.isArray(targetId)
           ( target[x] = val ) for x in targetId
         else
           target[targetId] = val
+          console.log "Writing #{val} to #{targetId} of #{target}"
 
     @map = (model) ->
         fn = crawl this, model, namespace, @element, @map
