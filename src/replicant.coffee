@@ -8,4 +8,5 @@
 ###import "utility.coffee" ####
 ###import "proxy.coffee" ####
 ###import "cartographer.coffee" ###
+###import "templateLib.coffee" ###
 ###import "main.coffee" ###

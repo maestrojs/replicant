@@ -13,8 +13,8 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @change_path = (p) -> proxy.change_path p
   @push = (value) -> proxy.push value
   @unshift = (value) -> proxy.unshift value
-  @pop = -> proxy.pop
-  @shift = -> proxy.shift
+  @pop = -> proxy.pop()
+  @shift = -> proxy.shift()
 
   this
 
@@ -30,49 +30,43 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   @change_path = (p) ->
     path = p
 
-  @push = (value) ->
-    key = subject.length
-    subject.push value
-    createMemberProxy key
-    fqn = buildFqn(path, key)
-    newIndex = subject.length - 1
-    notify fqn, "added", {
-      index: newIndex
-      value: wrapper[newIndex]
+  @add = ( key, keys ) ->
+    createMemberProxy k for k in keys
+    notify buildFqn(path, key), "added", {
+      index: key
+      value: wrapper[key]
     }
+
+  @push = (value) ->
+    key = -1 + subject.push value
+    @add key, [key]
 
   @unshift = (value) ->
-    key = subject.length
-    subject.push value
-    createMemberProxy key
-    fqn = buildFqn(path, key)
-    notify fqn, "added", {
-      index: 0
-      value: wrapper[0]
-    }
+    subject.unshift value
+    @add 0, [0..subject.length-1]
 
-  @pop = ->
-    value = wrapper[subject.length - 1]
-    subject.pop()
-    key = subject.length - 1
-    fqn = buildFqn(path, key)
-    delete wrapper[subject.length]
-    notify fqn, "removed", {
+  @remove = ( key, value, keys ) ->
+    createMemberProxy k for k in keys
+    notify buildFqn(path, key), "removed", {
       index: subject.length
       value: value
     }
+    console.log wrapper
     value
 
+  @pop = ->
+    key = subject.length - 1
+    value = wrapper[key]
+    subject.pop()
+    removeChildPath key
+    @remove key, value, []
+
   @shift = ->
-    value = wrapper[0]
+    key = 0
+    value = wrapper[key]
     subject.shift()
-    fqn = buildFqn(path, "0")
-    delete wrapper[subject.length]
-    notify fqn, "removed", {
-      index: 0
-      value: value
-    }
-    value
+    removeChildPath key
+    @remove key, value, [0..subject.length-1]
 
   addChildPath = (fqn, child, key) ->
     Object.defineProperty wrapper, fqn,
@@ -108,7 +102,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   createMemberProxy = (key) ->
     fqn = buildFqn path, key
     addChildPath fqn, wrapper, key
-    createProxyFor(false, fqn, key)
+    createProxyFor(true, fqn, key)
     
     Object.defineProperty wrapper, key,
       get: ->
@@ -139,7 +133,10 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     enumerable: false
     configurable: true
 
-  _(target).chain().keys().each (key) ->
-    createMemberProxy key
+  walk = (target) ->
+      _(target).chain().keys().each (key) ->
+        createMemberProxy key
+
+  walk( target )
 
   this

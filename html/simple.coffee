@@ -53,22 +53,31 @@ Ingredient = ( item, qty ) ->
                 display.hide = false
         hide: true
 
-$( ->
 
+Step = ( step, detail ) ->
+    {
+        step: step
+        detail: detail
+    }
+
+BuildIngredientList = ( list, recipe ) ->
+    recipe.ingredients.push( new Ingredient( x[0],x[1] ) ) for x in list
+
+BuildSteps = ( list, recipe ) ->
+    recipe.steps.push( new Step( x[0], x[1] ) ) for x list
+
+Recipe = ( Title, Description, Ingredients, Steps ) ->
     recipe =
-        title: "Munkin Pot Pie"
-        description: "Savory monkey under a crispy crust"
-        ingredientList: [
-            new Ingredient "pastry flour", "1 cup"
-            new Ingredient "shortening", "1/4 cup"
-            new Ingredient "milk", "1/2 cup"
-            new Ingredient "egg", "1 large"
-            new Ingredient "adult monkey", "1 lb"
-            new Ingredient "carrots", "2 cups diced"
-            new Ingredient "corn", "1 cup"
-            new Ingredient "celery", "1 cup diced"
-            new Ingredient "banana", "1 sliced"
-        ]
+        title: Title
+        description: Description
+        ingredients: []
+        steps: []
+
+        dumpus:
+          click: (root) ->
+            console.log JSON.stringify(root)
+          value: "Click for view model state"
+
         newIngredient:
             quantity:
                 value: ""
@@ -86,48 +95,53 @@ $( ->
                   )
                 this.ancestors[0].item = ""
                 this.ancestors[0].quantity = ""
-        prepTime: "20 minutes"
-        cookTime: "45 minutes"
-        servings: 10
-        prep: [
-          {
-            step: "preheat"
-            detail: " the oven to 425."
-          }
-          {
-            step: "combine"
-            detail: " everything in a big friggin bowl."
-          }
-          {
-            step: "trick"
-            detail: " the monkey into the bowl with the banana."
-          }
-          {
-            step: "bake"
-            detail: " until the monkey stops screaming."
-          }
+$( ->
+
+    recipe1 = new Recipe(
+        "Monkey Pot Pie",
+        "Savory chunks of monkey under a crispy crust",
+        [
+            ["pastry flour","1 cup"],
+            ["shortening","1/2 cup"],
+            ["milk","1/2 cup"],
+            ["egg","1 large"],
+            ["adult monkey","1 lb"],
+            ["carrots","2 cups diced"],
+            ["corn","1 cup"],
+            ["celery","1 cup diced"],
+            ["banana","1 sliced"],
+        ],
+        [
+            ["preheat","the oven to 425."],
+            ["combine","everything in big friggen bowl."],
+            ["trick","the monkey into the bowl with the banana."],
+            ["bake","until the monkey stops screaming."]
         ]
-        rating: "none"
-        ratings:
-          value: "Good"
-          items: [
-            "Yuk city",
-            "Ok",
-            "Good",
-            "YUMTOWN!"
-          ]
-        dumpus:
-          click: (root) ->
-            console.log JSON.stringify(root)
-          value: "Click for view model state"
+    )
 
-    doNothing = () ->
+    recipe2 = new Recipe(
+        "Beer cheese soup",
+        "An excuse to eat beer",
+        [
+            ["Pabst Blue Ribbon","6 pack"],
+            ["Mr. Block of Cheese",""],
+        ],
+        [
+            ["eat","the entire Mr. Block of Cheese."],
+            ["chug","all the beer."],
+        ]
+    )
 
-    proxy = replicant.create recipe, null, "recipe"
-    cartographer = replicant.map "#recipe"
-    
-    $( "#recipe" ).replaceWith( (cartographer.map proxy) )
+    recipes = new [ recipe1, recipe2 ]
 
+    list = replicant.create recipes, null, "recipes"
+    recipeTemplate = replicant.map "#recipe"
+    listTemplate = replicant.map "#recipes"
+
+    $( "#recipes" ).replaceWith( listTemplate.map list )
+    #$( "#recipe" ).replaceWith( (cartographer.map proxy) )
+
+    postal.channel("recipes_events").subscribe
     postal.channel("recipe_events").subscribe
 )
 
