@@ -28,7 +28,7 @@
             padding: 10px 10px 5px 15px;
         }
 
-        .ingredient-highlight {
+        .highlight {
             background-color: #D2E0E6;
         }
 
@@ -119,10 +119,13 @@
 
 </head>
 <body>
+
+    <h2>Recipes</h2>
     <div id="recipes">
-        <h2>Recipes</h2>
         <ul id="list">
-            <li></li>
+            <li>
+                <div id="title"></div>
+            </li>
         </ul>
     </div>
 
@@ -160,6 +163,12 @@
         </div>
         <div class="segment">
             <label>Preparation</label>
+            <ul id="steps">
+                <li>
+                    <span id="step"></span>
+                    <span id="detail"></span>
+                </li>
+            </ul>
             <table id="steps">
                 <tr>
                     <td id="step"></td>
@@ -167,9 +176,6 @@
                 </tr>
             </table>
         </div>
-        <select id="ratings">
-            <option />
-        </select>
         <input type="button" id="dumpus" />
     </div>
 </body>

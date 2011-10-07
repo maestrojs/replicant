@@ -8,9 +8,8 @@ TemplateLibrary = (root) ->
             type: "GET"
         })
 
-    @getTemplate: (name, onLoad) ->
+    @getTemplate = (name, onLoad) ->
         amplify.request( "templateLoader",
             { template: name, root: rootPath },
-            (data) ->
-                onLoad data
+            (data) -> onLoad data
         )

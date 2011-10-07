@@ -6,7 +6,7 @@ Ingredient = ( item, qty ) ->
     click: (r,x) -> JSON.stringify console.log.info
     mouseover: (r,x) ->
         @display.showbtn.hide = false
-        x.control.className = "ingredient ingredient-highlight"
+        x.control.className = "ingredient highlight"
         this.display.showbtn.class = "button inline-block"
         @hovered = true
     mouseout: (r,y) ->
@@ -64,11 +64,29 @@ BuildIngredientList = ( list, recipe ) ->
     recipe.ingredients.push( new Ingredient( x[0],x[1] ) ) for x in list
 
 BuildSteps = ( list, recipe ) ->
-    recipe.steps.push( new Step( x[0], x[1] ) ) for x list
+    recipe.steps.push( new Step( x[0], x[1] ) ) for x in list
 
 Recipe = ( Title, Description, Ingredients, Steps ) ->
     recipe =
-        title: Title
+        title:
+          value: Title
+          hovered: false
+          click: (r,x) ->
+            recipe = this.ancestors[0]
+            recipe.change_path ""
+            $( "#recipe" ).replaceWith( (recipeTemplate.map recipe) )
+          mouseover: (r,x) ->
+              x.control.className = "highlight"
+              @hovered = true
+          mouseout: (r,y) ->
+              @hovered = false
+              window.setTimeout ((x) ->
+                  if not x.hovered
+                      y.control.className = "ingredient"
+                  )
+                  , 100
+                  , this
+
         description: Description
         ingredients: []
         steps: []
@@ -88,16 +106,15 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
             btn:
               value: "Add"
               click: (root) ->
-                list = root.ingredientList
+                list = root.ingredients
                 newItem = root.newIngredient
                 list.push(
                     new Ingredient newItem.item, newItem.quantity
                   )
                 this.ancestors[0].item = ""
                 this.ancestors[0].quantity = ""
-$( ->
 
-    recipe1 = new Recipe(
+recipe1 = new Recipe(
         "Monkey Pot Pie",
         "Savory chunks of monkey under a crispy crust",
         [
@@ -119,30 +136,32 @@ $( ->
         ]
     )
 
-    recipe2 = new Recipe(
-        "Beer cheese soup",
-        "An excuse to eat beer",
-        [
-            ["Pabst Blue Ribbon","6 pack"],
-            ["Mr. Block of Cheese",""],
-        ],
-        [
-            ["eat","the entire Mr. Block of Cheese."],
-            ["chug","all the beer."],
-        ]
-    )
+recipe2 = new Recipe(
+    "Beer cheese soup",
+    "An excuse to eat beer",
+    [
+        ["Pabst Blue Ribbon","6 pack"],
+        ["Mr. Block of Cheese",""],
+    ],
+    [
+        ["eat","the entire Mr. Block of Cheese."],
+        ["chug","all the beer."],
+    ]
+)
 
-    recipes = new [ recipe1, recipe2 ]
+recipes = [ recipe1, recipe2 ]
 
-    list = replicant.create recipes, null, "recipes"
+list = replicant.create recipes, null, "recipes"
+recipeTemplate = {}
+listTemplate = {}
+
+$( ->
+
     recipeTemplate = replicant.map "#recipe"
-    listTemplate = replicant.map "#recipes"
+    listTemplate = replicant.map "#recipes > #list"
 
-    $( "#recipes" ).replaceWith( listTemplate.map list )
-    #$( "#recipe" ).replaceWith( (cartographer.map proxy) )
+    $( "#recipes > #list" ).replaceWith( listTemplate.map list )
 
     postal.channel("recipes_events").subscribe
     postal.channel("recipe_events").subscribe
 )
-
-#10.15.48.29
