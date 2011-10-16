@@ -3,7 +3,9 @@ ObjectWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   proxy = new Proxy( this, target, onEvent, namespace, addChild, removeChild)
 
   @change_path = (p) -> proxy.change_path p
-  
+
+  @getOriginal = () -> proxy.original
+
   this
 
 ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
@@ -15,6 +17,8 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @unshift = (value) -> proxy.unshift value
   @pop = -> proxy.pop()
   @shift = -> proxy.shift()
+
+  @getOriginal = () -> proxy.original
 
   this
 
@@ -54,6 +58,8 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     console.log wrapper
     value
 
+  @original = subject
+
   @pop = ->
     key = subject.length - 1
     value = wrapper[key]
@@ -76,6 +82,15 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     if child != wrapper and not _.any( child.ancestors, (x) -> x == wrapper )
         child.ancestors.push wrapper
     addToParent fqn, child, key
+
+  getLocalFqn = ( fqn ) ->
+      parts = fqn.split "."
+      base = subject.constructor.name
+      result =
+        switch parts.length
+          when 0 then base
+          else "#{base}.#{parts[parts.length-1]}"
+
 
   removeChildPath = (fqn) ->
     delete wrapper[fqn]

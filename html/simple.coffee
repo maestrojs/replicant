@@ -73,8 +73,8 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
           hovered: false
           click: (r,x) ->
             recipe = this.ancestors[0]
-            recipe.change_path ""
-            $( "#recipe" ).replaceWith( (recipeTemplate.map recipe) )
+            alias = replicant.create recipe.getOriginal(), null, "recipe"
+            $( "#recipe" ).replaceWith( (recipeTemplate.map alias) )
           mouseover: (r,x) ->
               x.control.className = "highlight"
               @hovered = true
@@ -113,6 +113,10 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
                   )
                 this.ancestors[0].item = ""
                 this.ancestors[0].quantity = ""
+
+    BuildIngredientList( Ingredients, recipe )
+    BuildSteps( Steps, recipe )
+    recipe
 
 recipe1 = new Recipe(
         "Monkey Pot Pie",
