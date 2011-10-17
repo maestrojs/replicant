@@ -84,6 +84,7 @@ Cartographer = (target, namespace) ->
       type: "type"
       width: "width"
       height: "height"
+      value: "value"
 
     crawl = ( context, root, namespace, element ) ->
         id = element["id"]
@@ -134,7 +135,8 @@ Cartographer = (target, namespace) ->
 
     makeTag = ( context, html, tag, template, myFqn, id, val, root, model ) ->
         properties = {}
-        content = if val then val else template.textContent
+        templateSource = if template.textContent then template.textContent else template.value
+        content = if val then val else templateSource
         element = {}
         if id or id == 0
             properties.id = id
@@ -144,7 +146,7 @@ Cartographer = (target, namespace) ->
 
         if tag == "INPUT"
             if not _.isObject content
-                properties.value = content
+              properties.value = content
             element = html[tag]( properties )
         else
           element = html[tag]( properties, content )
@@ -180,7 +182,7 @@ Cartographer = (target, namespace) ->
 
     conditionalCopy = ( source, target, sourceId, targetId ) ->
       val = source[sourceId]
-      if val != undefined and ( val != "" and targetId != "value" )
+      if val != undefined and ( val != ""  )
         if _.isArray(targetId)
           ( target[x] = val ) for x in targetId
         else

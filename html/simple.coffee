@@ -25,7 +25,6 @@ Ingredient = ( item, qty ) ->
         qty: qty
         showbtn:
             class: "button"
-            value: "edit"
             hide: true
             click: (p, x) ->
                 editor = this.ancestors[1].edit
@@ -105,7 +104,6 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
                 value: ""
                 click: (x, y) -> y.control.select()
             btn:
-              value: "Add"
               click: (root) ->
                 list = root.ingredients
                 newItem = root.newIngredient

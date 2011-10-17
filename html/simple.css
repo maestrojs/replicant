@@ -45,6 +45,10 @@ span {
     border: thin transparent solid;
 }
 
+.heading {
+    font-size: 1.6em;
+}
+
 .button {
     border: thin black solid;
     margin: .0em .3em;

@@ -11,8 +11,8 @@
 </head>
 <body>
 
-    <h2>Recipes</h2>
     <div id="recipes">
+        <span class="heading">Recipes</span><input type="button" value="+" />
         <ul id="list">
             <li>
                 <div id="title"></div>
@@ -20,7 +20,7 @@
         </ul>
     </div>
 
-    <div id="recipe" class="test">
+    <div id="recipe" class="test" hidden>
         <h2 id="title" class="test"></h2>
         <div>
             <label>Description</label>
@@ -29,13 +29,13 @@
         <div class="segment">
             <label>Ingredients</label>
             <div id="ingredients">
+                No Ingredients :(
                 <div class="ingredient">
-                    No Ingredients :(
                     <div id="display">
                         <span id="qty"></span>
                         <span id="item"></span>
-                        <input id="showbtn" type="button" />
-                        <input id="deletebtn" type="button" value="X" />
+                        <input id="showbtn" type="button" value="edit" />
+                        <input id="deletebtn" type="button" value="x" />
                     </div>
                     <div id="edit">
                         <input type="text" id="qty" />
@@ -45,14 +45,15 @@
                     </div>
                 </div>
             </div>
-            <div id="newIngredient">
+
+        </div>
+        <div id="newIngredient">
                 <form>
                     <input id="quantity" type="text" />
                     <input id="item" type="text" />
-                    <input id="btn" type="button" />
+                    <input id="btn" type="button" value="Add" />
                 </form>
             </div>
-        </div>
         <div class="segment">
             <label>Preparation</label>
             <ul id="steps">
