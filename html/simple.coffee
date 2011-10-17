@@ -74,18 +74,19 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
           click: (r,x) ->
             recipe = this.ancestors[0]
             alias = replicant.create recipe.getOriginal(), null, "recipe"
+
             $( "#recipe" ).replaceWith( (recipeTemplate.map alias) )
           mouseover: (r,x) ->
-              x.control.className = "highlight"
+              #x.control.className = "highlight"
               @hovered = true
           mouseout: (r,y) ->
               @hovered = false
-              window.setTimeout ((x) ->
-                  if not x.hovered
-                      y.control.className = "ingredient"
-                  )
-                  , 100
-                  , this
+              #window.setTimeout ((x) ->
+              #    if not x.hovered
+              #        y.control.className = "ingredient"
+              #    )
+              #    , 100
+              #    , this
 
         description: Description
         ingredients: []

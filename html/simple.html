@@ -6,116 +6,7 @@
     <script type="text/javascript" src="../ext/postal.min.js"></script>
     <script type="text/javascript" src="../lib/replicant.js"></script>
     <script type="text/javascript" src="../html/simple.coffee"></script>
-    <style>
-
-        body {
-            font-family: Helvetica;
-            font-size: 1.2em;
-        }
-
-        .simple {
-            list-style-type: none
-        }
-
-        #ingredientList {
-            
-            border: dashed black thin;
-            padding: 1.5em;
-            width: 24em;
-        }
-
-        .ingredient {
-            padding: 10px 10px 5px 15px;
-        }
-
-        .highlight {
-            background-color: #D2E0E6;
-        }
-
-        #ingredientList #qty {
-            font-weight: bold;
-            padding-right: 1em;
-            width: 8em;
-            display: inline-block;
-        }
-
-        #ingredientList span {
-            padding-right: 1em;
-            width: 8em;
-            display: inline-block;
-        }
-
-        #ingredientList input[type=text] {
-            padding-right: 1em;
-            width: 10em;
-            display: inline-block;
-        }
-
-        #ingredientList[type=button] {
-            width: 3em;
-            font-size: 2.5em;
-            display: inline-block;
-        }
-        
-        .button {
-            font-weight: bold;
-            border: black solid 3px;
-            width: 3em;
-            text-align: center;
-        }
-
-        .inline-block {
-            display: inline-block;
-        }
-
-        #ingredientList .ingredient {
-            height: 1.6em;
-        }
-
-        #recipe div.segment{
-            display: inline-block;
-            padding: 2em;
-        }
-
-        label {
-            font-size: 1.2em;
-            font-weight: bold;
-            line-height: 2em;
-        }
-
-        #newIngredient label {
-            font-size: 0.8em;
-            font-weight: bold;
-            line-height: 1.5em;
-        }
-
-        #description {
-            padding-left: .8em;
-        }
-
-        #segment {
-            display: inline-block;
-        }
-
-        #prep {
-            border: dashed black thin;
-            padding: 1.5em;
-        }
-
-        #step {
-            font-size: 1.6em;
-            font-weight: 600;
-            text-align: right;
-            padding-bottom: 0em;
-        }
-
-        #detail {
-            padding-bottom: 0em;
-            padding-top: .25em;
-            padding-left: .4em;
-        }
-
-    </style>
+    <link href="simple.css" type="text/css" rel="stylesheet">
 
 </head>
 <body>
@@ -143,7 +34,8 @@
                     <div id="display">
                         <span id="qty"></span>
                         <span id="item"></span>
-                        <div id="showbtn" class="button" ></div>
+                        <input id="showbtn" type="button" />
+                        <input id="deletebtn" type="button" value="X" />
                     </div>
                     <div id="edit">
                         <input type="text" id="qty" />
@@ -155,8 +47,8 @@
             </div>
             <div id="newIngredient">
                 <form>
-                    <label>Quantity</label><input id="quantity" type="text" />
-                    <label>Item</label><input id="item" type="text" />
+                    <input id="quantity" type="text" />
+                    <input id="item" type="text" />
                     <input id="btn" type="button" />
                 </form>
             </div>
@@ -169,12 +61,6 @@
                     <span id="detail"></span>
                 </li>
             </ul>
-            <table id="steps">
-                <tr>
-                    <td id="step"></td>
-                    <td><span id="detail"></span></td>
-                </tr>
-            </table>
         </div>
         <input type="button" id="dumpus" />
     </div>

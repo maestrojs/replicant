@@ -4,6 +4,9 @@ ObjectWrapper = (target, onEvent, namespace, addChild, removeChild) ->
 
   @change_path = (p) -> proxy.change_path p
 
+  @extractAs = ( namespace ) ->
+    replicant.create proxy.original, proxy.eventHandler, namespace
+
   @getOriginal = () -> proxy.original
 
   this
@@ -18,6 +21,9 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @pop = -> proxy.pop()
   @shift = -> proxy.shift()
 
+  @extractAs = ( namespace ) ->
+    replicant.create proxy.original, proxy.eventHandler, namespace
+
   @getOriginal = () -> proxy.original
 
   this
@@ -30,7 +36,9 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   removeFromParent = removeChild or () ->
   subject = target
   ancestors = []
-  
+
+  @eventHandler = onEvent
+
   @change_path = (p) ->
     path = p
 

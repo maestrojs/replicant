@@ -1,0 +1,134 @@
+body {
+    font-family: Georgia;
+    font-size: .8em;
+}
+
+input {
+    font-size: 1em;
+    font-family: Georgia;
+    background-color: transparent;
+    box-shadow: .1em .1em .1em #0d3349;
+    border-bottom: #0d3349 solid thin;
+    padding: .15em .5em;
+}
+
+input:focus {
+    border-top: #0d3349 solid thin;
+    box-shadow: -.1em -.1em .1em #0d3349;
+}
+
+input[type=button] {
+    border: thin black solid;
+    margin: .0em .3em;
+    padding: .15em .5em;
+    box-shadow: .1em .1em .1em #0d3349;
+}
+
+input[type=button]:hover {
+    text-shadow: #0d3349;
+    box-shadow: .15em .15em .15em #0d3349;
+    background-color: white;
+}
+
+label {
+    font-size: 1.2em;
+    font-weight: bolder;
+}
+
+ul {
+    list-style: none;
+}
+
+span {
+    margin: .0em .3em;
+    padding: .15em .5em;
+    border: thin transparent solid;
+}
+
+.button {
+    border: thin black solid;
+    margin: .0em .3em;
+    padding: .15em .5em;
+    box-shadow: .1em .1em .1em #0d3349;
+}
+
+
+
+.button:hover {
+    
+    text-shadow: #0d3349;
+    box-shadow: .15em .15em .15em #0d3349;
+    background-color: #f5fAff;
+}
+
+.hidden {
+    display: none;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+
+
+.ingredient {
+    display: inline-block;
+    height: 1.5em;
+    padding: .25em;
+    width: 30em;
+}
+
+.ingredient:nth-child(even) {
+    background-color: #E2E0E6;
+}
+
+.ingredient:hover {
+    background-color: #f0f8ff;
+}
+
+.ingredient input[type=button] {
+    display: none;
+}
+
+.ingredient:hover input[type=button] {
+    display: inline-block;
+}
+
+.ingredient input {
+    display: inline-block;
+    margin: 0em .2em;
+}
+
+.ingredient span {
+    display: inline-block;
+}
+
+.ingredient #qty {
+    width: 8em;
+}
+
+.ingredient #item {
+    width: 12em;
+}
+
+#steps span {
+    display: inline-block;
+}
+
+#steps li:nth-child(even) {
+    background-color: #E2E0E6;
+}
+
+#steps #step {
+    font-weight: bold;
+    vertical-align: top;
+    width: 6em;
+}
+
+#steps #detail {
+    width: 16em;
+}
+
+.segment {
+    width: 40%;
+}
