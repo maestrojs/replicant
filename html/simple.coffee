@@ -71,21 +71,11 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
           value: Title
           hovered: false
           click: (r,x) ->
-            recipe = this.ancestors[0]
-            alias = replicant.create recipe.getOriginal(), null, "recipe"
-
-            $( "#recipe" ).replaceWith( (recipeTemplate.map alias) )
+            cartographer.apply( "recipe", this.ancestors[0].extractAs "recipe"  )
           mouseover: (r,x) ->
-              #x.control.className = "highlight"
               @hovered = true
           mouseout: (r,y) ->
               @hovered = false
-              #window.setTimeout ((x) ->
-              #    if not x.hovered
-              #        y.control.className = "ingredient"
-              #    )
-              #    , 100
-              #    , this
 
         description: Description
         ingredients: []
@@ -161,15 +151,12 @@ recipe2 = new Recipe(
 recipes = [ recipe1, recipe2 ]
 
 list = replicant.create recipes, null, "recipes"
-recipeTemplate = {}
-listTemplate = {}
 
 $( ->
 
-    recipeTemplate = replicant.map "#recipe"
-    listTemplate = replicant.map "#recipes > #list"
-
-    $( "#recipes > #list" ).replaceWith( listTemplate.map list )
+    cartographer.map( "#recipe" )
+    cartographer.map( "#recipes > #list" )
+    cartographer.apply( "list", list )
 
     postal.channel("recipes_events").subscribe
     postal.channel("recipe_events").subscribe

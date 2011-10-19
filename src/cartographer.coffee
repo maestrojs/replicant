@@ -1,6 +1,27 @@
-Cartographer = (target, namespace) ->
+cartographer =
+
+  templates: {}
+
+  map: ( target, namespace ) ->
+    template = new Template target, namespace
+    @templates[template.fqn] = template
+
+  apply: ( template, proxy, render, error ) ->
+    templateInstance = @templates[template]
+    if templateInstance
+      result = templateInstance.apply proxy
+      if render
+        render( result, templateInstance.fqn )
+      else
+        $("#" + templateInstance.fqn ).replaceWith( result )
+    else if error
+      error()
+
+context["cartographer"] = cartographer
+
+Template = (target, namespace) ->
     @element = $(target)[0]
-    @map = ->
+    @apply = ->
     @html = DOMBuilder.dom
     @template = {}
 
@@ -182,15 +203,14 @@ Cartographer = (target, namespace) ->
 
     conditionalCopy = ( source, target, sourceId, targetId ) ->
       val = source[sourceId]
-      if val != undefined and ( val != ""  )
+      if val != undefined
         if _.isArray(targetId)
           ( target[x] = val ) for x in targetId
         else
           target[targetId] = val
-          #console.log "Writing #{val} to #{targetId} of #{target}"
 
-    @map = (model) ->
-        fn = crawl this, model, namespace, @element, @map
+    @apply = (model) ->
+        fn = crawl this, model, namespace, @element, @apply
         fn @html, model
 
     this

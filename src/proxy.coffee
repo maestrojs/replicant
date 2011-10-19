@@ -1,21 +1,19 @@
 ObjectWrapper = (target, onEvent, namespace, addChild, removeChild) ->
-
   proxy = new Proxy( this, target, onEvent, namespace, addChild, removeChild)
 
   @change_path = (p) -> proxy.change_path p
   @addDependencyProperty = ( key, observable ) -> proxy.addDependencyProperty key, observable
-  @extractAs = ( namespace ) -> replicant.create proxy.original, proxy.eventHandler, namespace
+  @extractAs = ( alias ) -> replicant.create proxy.original, null, alias
   @getOriginal = () -> proxy.original
 
   this
 
 ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
-
   proxy = new Proxy( this, target, onEvent, namespace, addChild, removeChild)
 
   @change_path = (p) -> proxy.change_path p
   @addDependencyProperty = ( key, observable ) -> proxy.addDependencyProperty key, observable
-  @extractAs = ( namespace ) -> replicant.create proxy.original, proxy.eventHandler, namespace
+  @extractAs = ( alias ) -> replicant.create proxy.original, null, alias
   @getOriginal = () -> proxy.original
   @pop = -> proxy.pop()
   @push = (value) -> proxy.push value
@@ -52,7 +50,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
       child.ancestors.push wrapper
     addToParent fqn, child, key
 
-  @eventHandler = onEvent
+  @getHandler = () -> onEvent
 
   @change_path = (p) ->
     fullPath = p

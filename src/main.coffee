@@ -21,10 +21,4 @@ replicant =
 
     proxy
 
-  scan: ( target, namespace ) ->
-    domFactory target, namespace
-
-  map: ( target ) ->
-    new Cartographer( target, "" )
-
 context["replicant"] = replicant
