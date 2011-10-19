@@ -6,6 +6,7 @@
 ###
 
 ###import "utility.coffee" ####
+###import "dependencyProperty.coffee" ###
 ###import "proxy.coffee" ####
 ###import "cartographer.coffee" ###
 ###import "templateLib.coffee" ###

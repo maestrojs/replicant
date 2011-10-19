@@ -4,7 +4,6 @@ QUnit.specify "write proxy", ->
         setted = []
 
         onSet = ( w, x, y, z ) ->
-            #if y == "wrote" or y == "added"
             setted.push { property: x, value: z.value, old: z.previous }
 
         theFellowship =
@@ -26,7 +25,6 @@ QUnit.specify "write proxy", ->
 
         proxy.humans[2].char_class = "Hero"
         proxy["humans.2.char_class"] = "Dead Guy :("
-        console.log JSON.stringify setted
 
         it "should capture title write", ->
             assert( _.any setted, (x) -> x.property == "title" ).isTrue()
@@ -35,7 +33,7 @@ QUnit.specify "write proxy", ->
             assert( proxy.humans.length ).equals( 3 )
 
         it "should have changed sub proxy property", ->
-            assert( proxy.humans[2].char_class).equals( "Dead Guy :(" )
+            assert( proxy.humans["2.char_class"]).equals( "Dead Guy :(" )
 
         it "should capture write of nested collection element property", ->
             assert( _.any setted, (x) -> x.property == "humans.0.char_class" ).isTrue()

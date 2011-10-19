@@ -5,7 +5,6 @@ QUnit.specify "read proxy", ->
 
         onEvent = ( w, x, y, z ) ->
             getted.push { property: x, value: z.value}
-            console.log "Read #{x}"
 
         drWho =
             name: "The Doctor"

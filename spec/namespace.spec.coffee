@@ -101,11 +101,13 @@ QUnit.specify "namespace", ->
             ]
         myPC = replicant.create myPC, null, "myPC"
 
+        console.log myPC
+
         myPC["myPC.storage.1.capacity"] = "1 TB"
         myPC["myPC.memory.1.sticks.1.pin"] = 240
         gpuRAM =  myPC["myPC.gpu.ram"]
-        secondDiskSize = myPC.storage[1].capacity #myPC["storage.1.capacity"]
-        fourthRAMStickPinSize = myPC.memory[1].sticks[1].pin #myPC["memory.1.sticks.1.pin"]
+        secondDiskSize = myPC.storage[1].capacity
+        fourthRAMStickPinSize = myPC.memory[1].sticks[1].pin
 
         it "should have retrieved correct gpu ram", ->
             assert( gpuRAM ).equals("1 GB")
