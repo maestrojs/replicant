@@ -113,8 +113,14 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
                 this.ancestors[0].item = ""
                 this.ancestors[0].quantity = ""
 
+          __dependencies__:
+            stuff: (x) ->
+              items = _.pluck(x.ingredients, 'display.item')
+              "Item list: #{items.toString()}"
+
     BuildIngredientList( Ingredients, recipe )
     BuildSteps( Steps, recipe )
+
     recipe
 
 recipe1 = new Recipe(

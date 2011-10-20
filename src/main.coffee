@@ -1,6 +1,8 @@
 
 replicant =
   create: ( target, onevent, namespace ) ->
+    dependencyListener.addNamespace namespace
+
     channel = postal.channel namespace + "_model"
 
     onEvent = onevent or= ( parent, key, event, info ) ->

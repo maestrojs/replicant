@@ -1,6 +1,6 @@
 body {
     font-family: Georgia;
-    font-size: .8em;
+    font-size: 1.2em;
 }
 
 input {
@@ -31,8 +31,7 @@ input[type=button]:hover {
 }
 
 label {
-    font-size: 1.2em;
-    font-weight: bolder;
+    font-size: 1.4em;
 }
 
 ul {
@@ -43,10 +42,6 @@ span {
     margin: .0em .3em;
     padding: .15em .5em;
     border: thin transparent solid;
-}
-
-.heading {
-    font-size: 1.6em;
 }
 
 .button {
@@ -135,4 +130,12 @@ span {
 
 .segment {
     width: 40%;
+}
+
+h2 {
+    font-size: 1.6em;
+}
+
+.heading {
+    font-size: 1.6em;
 }

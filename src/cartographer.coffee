@@ -187,7 +187,7 @@ Cartographer = (target, namespace) ->
           ( target[x] = val ) for x in targetId
         else
           target[targetId] = val
-          console.log "Writing #{val} to #{targetId} of #{target}"
+          #console.log "Writing #{val} to #{targetId} of #{target}"
 
     @map = (model) ->
         fn = crawl this, model, namespace, @element, @map
