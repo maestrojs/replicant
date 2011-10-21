@@ -1,13 +1,13 @@
-cartographer =
+cartographer = (() ->
+  self = this
+  templates = {}
 
-  templates: {}
-
-  map: ( target, namespace ) ->
+  @map = ( target, namespace ) ->
     template = new Template target, namespace
-    @templates[template.fqn] = template
+    templates[template.fqn] = template
 
-  apply: ( template, proxy, render, error ) ->
-    templateInstance = @templates[template]
+  @apply = ( template, proxy, render, error ) ->
+    templateInstance = templates[template]
     if templateInstance
       result = templateInstance.apply proxy
       if render
@@ -16,6 +16,9 @@ cartographer =
         $("#" + templateInstance.fqn ).replaceWith( result )
     else if error
       error()
+
+  self
+)()
 
 context["cartographer"] = cartographer
 
