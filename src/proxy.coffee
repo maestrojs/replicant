@@ -95,9 +95,31 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
 
 Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   self = this
+  fullPath = namespace or= ""
+  addToParent = null
+
+  addChildPath = ( lqn, child, key ) ->
+    isRoot = ancestors.length == 0
+    head = if isRoot then fullPath else path
+    fqn = buildFqn head, lqn
+    lqn = if isRoot then fqn else lqn
+    Object.defineProperty wrapper, lqn,
+      get: -> child[key]
+      set: (value) -> child[key] = value
+      configurable: true
+    if child != wrapper and not _.any( child.ancestors, (x) -> x == wrapper )
+      child.ancestors.push wrapper
+    if not isRoot
+      addToParent fqn, child, lqn
+
+  addToParent = addChild or addChildPath
+
+  getLocalPath = () ->
+    parts = fullPath.split('.')
+    if parts.length > 0 then parts[parts.length-1] else ""
+  
   proxy = {}
-  path = namespace or= ""
-  addToParent = addChild or () ->
+  path = getLocalPath()
   removeFromParent = removeChild or () ->
   subject = target
   ancestors = []
@@ -106,15 +128,15 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   @eventHandler = onEvent
 
   @change_path = (p) ->
-    path = p
+    fullPath = p
 
   @add = ( key, keys ) ->
     createMemberProxy k for k in keys
-    notify buildFqn( path, "length"), "wrote", {
+    notify buildFqn( fullPath, "length"), "wrote", {
       value: subject.length,
       previous: -1 + subject.length
     }
-    notify buildFqn(path, key), "added", {
+    notify buildFqn(fullPath, key), "added", {
       index: key
       value: wrapper[key]
     }
@@ -129,11 +151,11 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   @remove = ( key, value, keys ) ->
     createMemberProxy k for k in keys
-    notify buildFqn( path, "length"), "wrote", {
+    notify buildFqn( fullPath, "length"), "wrote", {
       value: subject.length,
       previous: 1 + subject.length
     }
-    notify buildFqn(path, key), "removed", {
+    notify buildFqn(fullPath, key), "removed", {
       index: subject.length
       value: value
     }
@@ -156,15 +178,6 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     removeChildPath key
     @remove key, value, [0..subject.length-1]
 
-  addChildPath = (fqn, child, key) ->
-    Object.defineProperty wrapper, fqn,
-      get: -> child[key]
-      set: (value) -> child[key] = value
-      configurable: true
-    if child != wrapper and not _.any( child.ancestors, (x) -> x == wrapper )
-        child.ancestors.push wrapper
-    addToParent fqn, child, key
-
   getLocalFqn = ( fqn ) ->
       parts = fqn.split "."
       base = subject.constructor.name
@@ -172,7 +185,6 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
         switch parts.length
           when 0 then base
           else "#{base}.#{parts[parts.length-1]}"
-
 
   removeChildPath = (fqn) ->
     delete wrapper[fqn]
@@ -189,7 +201,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
         -> new ObjectWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
         ->
           _(value).chain().keys().each (k) ->
-            addChildPath( "#{fqn}.#{k}", value, k )
+            addToParent buildFqn( path, k ), value, k
             value.change_path( fqn )
           value
         ,
@@ -198,19 +210,19 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   createMemberProxy = (key) ->
     fqn = buildFqn path, key
-    addChildPath fqn, wrapper, key
-    createProxyFor(true, fqn, key)
+    addToParent fqn, wrapper, key
+    createProxyFor true, buildFqn( fullPath, key ), key
     
     Object.defineProperty wrapper, key,
       get: ->
-        fqn1 = buildFqn path, key
+        fqn1 = buildFqn fullPath, key
         value = createProxyFor(false, fqn1, key)
         notify fqn1, "read", { value: value }
         dependencyListener.recordAccess wrapper, fqn
         value
 
       set: (value) ->
-        fqn1 = buildFqn path, key
+        fqn1 = buildFqn fullPath, key
         old = proxy[key]
         subject[key] = value
         newValue = createProxyFor(true, fqn1, key)
@@ -221,7 +233,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   Object.defineProperty wrapper, "length",
     get: ->
-        fqn1 = buildFqn path, "length"
+        fqn1 = buildFqn fullPath, "length"
         notify fqn1, "read", { value: subject.length }
         dependencyListener.recordAccess wrapper, fqn1
         subject.length
@@ -235,11 +247,11 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     configurable: true
 
   @defineObservable = ( key, observable ) ->
-    fqn1 = buildFqn path, key
+    fqn1 = buildFqn fullPath, key
     dependencyListener.watchFor( fqn1 )
     observable(wrapper)
     dependencyListener.endWatch()
-    addChildPath fqn1, wrapper, key
+    addToParent buildFqn( path, key ), wrapper, key
 
     Object.defineProperty wrapper, key,
       get: ->
@@ -263,6 +275,6 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   walk( target )
 
-  addChildPath path + ".length", wrapper, "length"
+  addToParent ( buildFqn path, "length" ), wrapper, "length"
 
   this
