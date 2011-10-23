@@ -1,12 +1,19 @@
-cartographer =
+Cartographer = () ->
+  self = this
 
-  templates: {}
+  postal.channel("cartographer").subscribe (m) ->
+    if m.map
+      self.map m.target, m.namespace
+    else if m.apply
+      self.apply m.template, m.proxy, m.render, m.error
 
-  map: ( target, namespace ) ->
+  @templates = {}
+
+  @map = ( target, namespace ) ->
     template = new Template target, namespace
     @templates[template.fqn] = template
 
-  apply: ( template, proxy, render, error ) ->
+  @apply = ( template, proxy, render, error ) ->
     templateInstance = @templates[template]
     if templateInstance
       result = templateInstance.apply proxy
@@ -17,13 +24,17 @@ cartographer =
     else if error
       error()
 
-context["cartographer"] = cartographer
+  self
+
+context["cartographer"] = new Cartographer()
 
 Template = (target, namespace) ->
+    self = this
     @element = $(target)[0]
     @apply = ->
     @html = DOMBuilder.dom
     @template = {}
+    @changesSubscription
 
     createFqn = ( namespace, id ) ->
         if id == undefined or id == ""
@@ -38,33 +49,33 @@ Template = (target, namespace) ->
 
     @eventChannel = postal.channel(@fqn + "_events")
 
-    channel = @eventChannel
+    subscribe = ( context, channelName ) ->
+      if @changeSubscription and @changeSubscription.unsubscribe
+        @changeSubscription.ubsubscribe();
 
-    subscribe = ( context ) ->
-        postal.channel(context.fqn + "_model").subscribe (m) ->
+      @changesSubscription = postal.channel( channelName ).subscribe (m) ->
+          if m.event != "read"
+            control = context[m.key]
 
-            if m.event != "read"
-              control = context[m.key]
+            lastIndex = m.key.lastIndexOf "."
+            parentKey = m.key.substring 0, lastIndex
+            childKey = m.key.substring ( lastIndex + 1 )
+            target = "value"
 
-              lastIndex = m.key.lastIndexOf "."
-              parentKey = m.key.substring 0, lastIndex
-              childKey = m.key.substring ( lastIndex + 1 )
-              target = "value"
+            if childKey == "value" or not control
+                control = context[parentKey]
+                target = childKey
 
-              if childKey == "value" or not control
-                  control = context[parentKey]
-                  target = childKey
+            if m.event == "wrote"
+                if control
+                    conditionalCopy m.info, control, "value", modelTargets[target]
 
-              if m.event == "wrote"
-                  if control
-                      conditionalCopy m.info, control, "value", modelTargets[target]
+            else if m.event == "added"
+              addName = parentKey + "_add"
+              newElement = context.template[addName]( childKey, m.parent )
+              $(context[parentKey]).append newElement
 
-              else if m.event == "added"
-                addName = parentKey + "_add"
-                newElement = context.template[addName]( childKey, m.parent )
-                $(context[parentKey]).append newElement
-
-    subscribe( this )
+    subscribe( self, self.fqn + "_model" )
 
     eventHandlers =
       click: "onclick"

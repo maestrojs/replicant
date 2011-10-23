@@ -5,6 +5,7 @@ ObjectWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @addDependencyProperty = ( key, observable ) -> proxy.addDependencyProperty key, observable
   @extractAs = ( alias ) -> replicant.create proxy.original, null, alias
   @getOriginal = () -> proxy.original
+  @subscribe = ( channelName ) -> proxy.subscribe channelName
 
   this
 
@@ -18,6 +19,7 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @pop = -> proxy.pop()
   @push = (value) -> proxy.push value
   @shift = -> proxy.shift()
+  @subscribe = ( channelName ) -> proxy.subscribe channelName
   @unshift = (value) -> proxy.unshift value
 
   this
@@ -37,6 +39,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   subject = target
   ancestors = []
   readHook = null
+  subscription = {}
 
   addChildPath = ( lqn, child, key ) ->
     isRoot = ancestors.length == 0
@@ -49,6 +52,14 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     if child != wrapper and not _.any( child.ancestors, (x) -> x == wrapper )
       child.ancestors.push wrapper
     addToParent fqn, child, key
+
+  @subscribe = ( channelName ) ->
+    if subscription and subscription.unsubscribe
+      subscription.unsubscribe()
+
+    subscription = postal.channel( channelName ).subscribe (m) ->
+      if m.event == "onchange"
+        wrapper[m.id] = m.control.value
 
   @getHandler = () -> onEvent
 

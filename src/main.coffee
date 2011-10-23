@@ -1,5 +1,5 @@
-
 replicant =
+
   create: ( target, onevent, namespace ) ->
     dependencyManager.addNamespace namespace
 
@@ -15,9 +15,7 @@ replicant =
     -> target
     -> target
 
-    postal.channel(namespace + "_events").subscribe (m) ->
-      if m.event == "onchange"
-        proxy[m.id] = m.control.value
+    proxy.subscribe( namespace + "_events" )
 
     proxy
 
