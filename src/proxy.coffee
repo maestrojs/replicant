@@ -6,6 +6,7 @@ ObjectWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @extractAs = ( alias ) -> replicant.create proxy.original, null, alias
   @getOriginal = () -> proxy.original
   @subscribe = ( channelName ) -> proxy.subscribe channelName
+  @getPath = () -> proxy.getPath
 
   this
 
@@ -16,6 +17,7 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @addDependencyProperty = ( key, observable ) -> proxy.addDependencyProperty key, observable
   @extractAs = ( alias ) -> replicant.create proxy.original, null, alias
   @getOriginal = () -> proxy.original
+  @getPath = () -> proxy.getPath
   @pop = -> proxy.pop()
   @push = (value) -> proxy.push value
   @shift = -> proxy.shift()
@@ -32,9 +34,9 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   getLocalPath = () ->
     parts = fullPath.split('.')
     if parts.length > 0 then parts[parts.length-1] else fullPath
-  
-  proxy = {}
+
   path = getLocalPath()
+  proxy = {}
   removeFromParent = removeChild or () ->
   subject = target
   ancestors = []
@@ -53,6 +55,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
       child.ancestors.push wrapper
     addToParent fqn, child, key
 
+
   @subscribe = ( channelName ) ->
     if subscription and subscription.unsubscribe
       subscription.unsubscribe()
@@ -63,8 +66,85 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   @getHandler = () -> onEvent
 
-  @change_path = (p) ->
-    fullPath = p
+  createMemberProxy = (key) ->
+    fqn = buildFqn path, key
+    createProxyFor true, buildFqn( fullPath, key ), key
+
+    Object.defineProperty wrapper, key,
+      get: ->
+        fqn1 = buildFqn fullPath, key
+        value = createProxyFor(false, fqn1, key)
+        notify fqn1, "read", { value: value }
+        dependencyManager.recordAccess wrapper, fqn1
+        unwindAncestralDependencies()
+        value
+
+      set: (value) ->
+        fqn1 = buildFqn fullPath, key
+        old = proxy[key]
+        subject[key] = value
+        newValue = createProxyFor(true, fqn1, key)
+        notify fqn1, "wrote", { value: value, previous: old }
+
+      configurable: true
+      enumerable: true
+
+    isRoot = ancestors.length == 0
+    if isRoot and fullPath != ""
+      addChildPath key, wrapper, key
+    else
+      addToParent fqn, wrapper, key
+
+  createProxyFor = ( writing, fqn, key ) ->
+    value = subject[key]
+    value = if value.getOriginal then value.getOriginal() else value
+    if writing or proxy[key] == undefined
+      proxy[key] = onProxyOf value,
+        -> new ArrayWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
+        -> new ObjectWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
+        -> value
+    proxy[key]
+
+  getLocalFqn = ( fqn ) ->
+      parts = fqn.split "."
+      base = subject.constructor.name
+      result =
+        switch parts.length
+          when 0 then base
+          else "#{base}.#{parts[parts.length-1]}"
+
+  notify = ( key, event, info ) ->
+    onEvent wrapper, key, event, info
+
+  removeChildPath = (fqn) ->
+    delete wrapper[fqn]
+    removeFromParent fqn
+
+  unwindAncestralDependencies = () ->
+    _( ancestors )
+      .chain().select( (x) -> x instanceof ArrayWrapper )
+      .each( (x) -> dependencyManager.recordAccess x, "#{x.getPath}.length" )
+
+  walk = (target) ->
+      _(target)
+        .chain()
+        .keys()
+        .select( (x) -> x != "__dependencies__")
+        .each (key) ->
+          createMemberProxy key
+
+      dependencyList = target.__dependencies__
+      if dependencyList
+        _(dependencyList)
+        .chain()
+        .keys()
+        .each (key) ->
+          self.addDependencyProperty key, dependencyList[key]
+
+  @change_path = (p) -> fullPath = p
+  @getHandler = () -> onEvent
+  @getPath = () -> fullPath
+  @original = subject
 
   @add = ( key, keys ) ->
     createMemberProxy k for k in keys
@@ -98,8 +178,6 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     console.log wrapper
     value
 
-  @original = subject
-
   @pop = ->
     key = subject.length - 1
     value = wrapper[key]
@@ -114,58 +192,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     removeChildPath key
     @remove key, value, [0..subject.length-1]
 
-  getLocalFqn = ( fqn ) ->
-      parts = fqn.split "."
-      base = subject.constructor.name
-      result =
-        switch parts.length
-          when 0 then base
-          else "#{base}.#{parts[parts.length-1]}"
 
-  removeChildPath = (fqn) ->
-    delete wrapper[fqn]
-    removeFromParent fqn
-
-  notify = ( key, event, info ) ->
-    onEvent wrapper, key, event, info
-
-  createProxyFor = ( writing, fqn, key ) ->
-    value = subject[key]
-    value = if value.getOriginal then value.getOriginal() else value
-    if writing or proxy[key] == undefined
-      proxy[key] = onProxyOf value,
-        -> new ArrayWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
-        -> new ObjectWrapper( value, onEvent, fqn, addChildPath, removeChildPath ),
-        -> value
-    proxy[key]
-
-  createMemberProxy = (key) ->
-    fqn = buildFqn path, key
-    createProxyFor true, buildFqn( fullPath, key ), key
-    
-    Object.defineProperty wrapper, key,
-      get: ->
-        fqn1 = buildFqn fullPath, key
-        value = createProxyFor(false, fqn1, key)
-        notify fqn1, "read", { value: value }
-        dependencyManager.recordAccess wrapper, fqn1
-        value
-
-      set: (value) ->
-        fqn1 = buildFqn fullPath, key
-        old = proxy[key]
-        subject[key] = value
-        newValue = createProxyFor(true, fqn1, key)
-        notify fqn1, "wrote", { value: value, previous: old }
-
-      configurable: true
-      enumerable: true
-
-    isRoot = ancestors.length == 0
-    if isRoot and fullPath != ""
-      addChildPath key, wrapper, key
-    else
-      addToParent fqn, wrapper, key
 
   Object.defineProperty wrapper, "length",
     get: ->
@@ -184,35 +211,21 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
 
   @addDependencyProperty = ( key, observable ) ->
     fqn1 = buildFqn fullPath, key
-    dependencyManager.watchFor( fqn1 )
-    observable(wrapper)
-    dependencyManager.endWatch()
 
     Object.defineProperty wrapper, key,
       get: ->
-        observable(wrapper)
+        dependencyManager.watchFor( fqn1 )
+        result = observable(wrapper)
+        dependencyManager.endWatch()
+        result
+        
+    wrapper[key]
 
     isRoot = ancestors.length == 0
     if isRoot and fullPath != ""
       addChildPath key, wrapper, key
     else
       addToParent buildFqn( path, key ), wrapper, key
-
-  walk = (target) ->
-      _(target)
-        .chain()
-        .keys()
-        .select( (x) -> x != "__dependencies__")
-        .each (key) ->
-          createMemberProxy key
-
-      dependencyList = target.__dependencies__
-      if dependencyList
-        _(dependencyList)
-        .chain()
-        .keys()
-        .each (key) ->
-          self.addDependencyProperty key, dependencyList[key]
 
   walk( target )
 

@@ -157,7 +157,4 @@ $( ->
     cartographer.map( "#recipe" )
     cartographer.map( "#recipes > #list" )
     cartographer.apply( "list", list )
-
-    postal.channel("recipes_events").subscribe
-    postal.channel("recipe_events").subscribe
 )
