@@ -1,6 +1,7 @@
 <html>
 <head>
     <script type="text/javascript" src="../ext/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="../ext/jquery-ui-1.8.16.custom.min.js"></script>
     <script type="text/javascript" src="../ext/DOMBuilder.min.js"></script>
     <script type="text/javascript" src="../ext/underscore-min.js"></script>
     <script type="text/javascript" src="../ext/postal.min.js"></script>
@@ -11,8 +12,12 @@
 <body>
     <div class="content">
         <div id="meals" class="slider">
-            <div>
+            <div class = "spacer">
                 <span id="title" class="option"></span>
+                <ul id="choices" class="expando">
+                    <li>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

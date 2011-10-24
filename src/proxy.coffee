@@ -23,6 +23,7 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @pop = -> proxy.pop()
   @push = (value) -> proxy.push value
   @shift = -> proxy.shift()
+  @sort = (compare) -> proxy.sort(compare)
   @subscribe = ( channelName ) -> proxy.subscribe channelName
   @unshift = (value) -> proxy.unshift value
 
@@ -195,7 +196,11 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     removeChildPath key
     @remove key, value, [0..subject.length-1]
 
-
+  @sort = (sorter) ->
+    old = subject
+    subject = subject.sort(sorter)
+    walk subject
+    notify fullPath, "wrote", { value: wrapper, previous: old }
 
   Object.defineProperty wrapper, "length",
     get: ->

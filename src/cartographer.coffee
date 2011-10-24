@@ -68,6 +68,10 @@ Template = (target, namespace) ->
 
             if m.event == "wrote"
                 if control
+                  if m.info.value instanceof ObjectWrapper or m.info.value instanceof ArrayWrapper
+                    newTree = context.template[m.key]( self.html, m.info.value, parentKey, childKey )
+                    $(context[m.key]).replaceWith newTree
+                  else
                     conditionalCopy m.info, control, "value", modelTargets[target]
 
             else if m.event == "added"

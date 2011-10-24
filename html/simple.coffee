@@ -81,6 +81,13 @@ Recipe = ( Title, Description, Ingredients, Steps ) ->
         ingredients: []
         steps: []
 
+        sort:
+          value: "Sort"
+          click: () ->
+            this.ancestors[0].ingredients.sort( (x,y) ->
+              if x.display.item > y.display.item then -1 else 1
+            )
+
         dumpus:
           click: (root) ->
             console.log JSON.stringify(root)
