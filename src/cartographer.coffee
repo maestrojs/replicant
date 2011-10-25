@@ -139,7 +139,6 @@ Template = (target, namespace) ->
                         childFactory( html, newModel, myFqn, newIndex )
 
                     for indx in [0..collection.length-1]
-                        #list.push childFactory( html, collection, myFqn, indx )
                         list.push ( call( html, collection, myFqn, indx ) for call in createChildren )
                         
                     childElement = makeTag( context, html, tag, element, myFqn, actualId, list, root, model )

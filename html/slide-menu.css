@@ -1,0 +1,38 @@
+body {
+    background-color: #C5D460;
+    color: white;
+    font-size: 1.5em;
+    font-family: Georgia;
+}
+
+span {
+    display: inline-block;
+    padding: .2em;
+}
+
+.content {
+    -webkit-border-radius: .2em;
+    border: #710F00;
+    box-shadow: .15em .15em .15em #600E00;
+    background-color: #AE1800;
+    padding: 2em;
+    margin: auto;
+    width: 10em;
+    left: 0;
+}
+.slider {
+    left: 0;
+}
+
+.option {
+    padding: .2em;
+    left: 0;
+    position: static;
+}
+
+.option:hover {
+    width: 6em;
+    text-decoration: underline;
+    box-shadow: .1em .1em .15em #600E00;
+    background-color: #BE1800;
+}

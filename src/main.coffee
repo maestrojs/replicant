@@ -1,6 +1,23 @@
-replicant =
+Replicant = () ->
+  self = this
+  proxies = {}
 
-  create: ( target, onevent, namespace ) ->
+  add = (name, proxy) ->
+    proxies[name] = proxy
+    if not self[name]
+      Object.defineProperty self, name,
+        get: ->
+          proxies[name]
+
+  postal.channel("replicant").subscribe (m) ->
+    if m.create
+      self.create m.target, m.onevent, m.namespace
+    else if m.get
+      m.callback( proxies[m.name] )
+    else
+      _(proxies).each( (x) -> x.getChannel().publish m )
+
+  @create = ( target, onevent, namespace ) ->
     dependencyManager.addNamespace namespace
 
     channel = postal.channel namespace + "_model"
@@ -10,13 +27,15 @@ replicant =
     namespace = namespace or= ""
     
     proxy = onProxyOf target,
-    -> new ArrayWrapper( target, onEvent, namespace),
+    -> new ArrayWrapper( target, onEvent, namespace ),
     -> new ObjectWrapper( target, onEvent, namespace ),
     -> target
     -> target
 
-    proxy.subscribe( namespace + "_events" )
-
+    proxy.subscribe namespace + "_events"
+    add namespace, proxy
     proxy
 
-context["replicant"] = replicant
+  self
+
+context["replicant"] = new Replicant()

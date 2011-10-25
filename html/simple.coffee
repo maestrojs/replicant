@@ -150,11 +150,37 @@ recipe2 = new Recipe(
 
 recipes = [ recipe1, recipe2 ]
 
-list = replicant.create recipes, null, "recipes"
+#list = replicant.create recipes, null, "recipes"
 
 $( ->
+    repl = postal.channel("replicant")
+    repl.publish
+        create: true,
+        target: recipes,
+        namespace: "recipes"
 
-    cartographer.map( "#recipe" )
-    cartographer.map( "#recipes > #list" )
-    cartographer.apply( "list", list )
+    cart = postal.channel("cartographer")
+
+    cart.publish
+      map: true
+      target: "#recipes > #list"
+
+    cart.publish
+      map: true
+      target: "#recipe"
+
+    repl.publish
+      get: true
+      name: "recipes"
+      callback: (x) ->
+        cart.publish
+          apply: true
+          template: "list"
+          proxy: x
+
+
+
+    #cartographer.map( "#recipe" )
+    #cartographer.map( "#recipes > #list" )
+    #cartographer.apply( "list", list )
 )
