@@ -25,6 +25,10 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @shift = -> proxy.shift()
   @subscribe = ( channelName ) -> proxy.subscribe channelName
   @unshift = (value) -> proxy.unshift value
+  @reverse = () -> proxy.reverse()
+  @sort = (fn) -> proxy.sort(fn)
+  @join = (separator) -> proxy.join(separator)
+  @toString = () -> proxy.toString()
 
   this
 
@@ -150,7 +154,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
   @original = subject
 
   @add = ( key, keys ) ->
-    createMemberProxy k for k in keys
+    @recrawl keys
     notify buildFqn( fullPath, "length"), "wrote", {
       value: subject.length,
       previous: -1 + subject.length
@@ -169,7 +173,7 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     @add 0, [0..subject.length-1]
 
   @remove = ( key, value, keys ) ->
-    createMemberProxy k for k in keys
+    @recrawl keys
     notify buildFqn( fullPath, "length"), "wrote", {
       value: subject.length,
       previous: 1 + subject.length
@@ -178,8 +182,15 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
       index: subject.length
       value: value
     }
+    #TODO: remove console.logs when done
     console.log wrapper
     value
+
+  @recrawl = (keys) ->
+    createMemberProxy k for k in keys
+
+  @genReadNotices = (keys) ->
+    notify buildFqn(fullPath,k), "read", { value: wrapper[k] } for k in keys
 
   @pop = ->
     key = subject.length - 1
@@ -195,7 +206,69 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     removeChildPath key
     @remove key, value, [0..subject.length-1]
 
+  @reverse = ->
+    old = wrapper
+    subject.reverse()
+    walk subject
+    notify fullPath, "reversed", {
+      index: subject.length
+      value: wrapper
+      previous: old
+    }
 
+  @sort = ->
+    old = wrapper
+    subject.sort.apply(subject, arguments)
+    walk subject
+    notify fullPath, "sorted", {
+      index: subject.length
+      value: wrapper
+      previous: old
+    }
+
+  @join = ->
+    value = subject.join.apply(subject, arguments)
+    # TODO: we may want to change this to send ONE notice
+    @genReadNotices [0..subject.length-1]
+    value
+
+  @toString = ->
+    value = subject.toString.apply(subject, arguments)
+    # TODO: we may want to change this to send ONE notice
+    @genReadNotices [0..subject.length-1]
+    value
+
+  @indexOf = ->
+    idx = subject.indexOf.apply(subject, arguments)
+    len = subject.length
+    i = 0
+    #TODO: I'm sure there's a better way to do this in coffee script
+    if idx is -1
+      while i < len
+        if wrapper[i] is arguments[0]
+          idx = i
+          break
+        i++
+    notify buildFqn(fullPath, idx), "read", {
+      index: subject.length
+      value: idx
+    }
+    idx
+
+  @lastIndexOf = ->
+    idx = subject.lastIndexOf.apply(subject, arguments)
+    i = subject.length - 1
+    if idx is -1
+      while i >= 0
+        if wrapper[i] is arguments[0]
+          idx = i
+          break
+        i--
+    notify buildFqn(fullPath, idx), "read", {
+      index: subject.length
+      value: idx
+    }
+    idx
 
   Object.defineProperty wrapper, "length",
     get: ->
