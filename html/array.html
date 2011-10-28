@@ -10,21 +10,17 @@
     <script type="text/javascript" src="../lib/replicant.js"></script>
     <script type="text/javascript">
         var stuff = {
-                        dummy : {
-                            one: 1,
-                            two: 2,
-                            list: [
-                              { nega: -1 },
-                              { one: 1 },
-                              { two: 2 },
-                              { three: 0 },
-                              { uber: 100 } ]
-                        }
+                        list: [
+                          { name: "Alex" },
+                          { name: "Chris" },
+                          { name: "Jim" },
+                          { name: "Kevin" },
+                          { name: "Ian" } ]
                     };
 
         var prxy = replicant.create(stuff);
 
-        prxy.dummy.list.reverse();
+        var removed = prxy.list.splice(4, 1, { name: "Esna" });
 
     </script>
 </head>

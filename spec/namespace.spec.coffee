@@ -99,7 +99,8 @@ QUnit.specify "namespace", ->
                     vendor: "Western Digital"
                 }
             ]
-        myPC = replicant.create myPC, null, "myPC"
+        fn = ->
+        myPC = replicant.create myPC, fn, "myPC"
 
         console.log myPC
 

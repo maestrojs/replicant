@@ -18,22 +18,31 @@ Replicant = () ->
       _(proxies).each( (x) -> x.getChannel().publish m )
 
   @create = ( target, onevent, namespace ) ->
-    dependencyManager.addNamespace namespace
-
-    channel = postal.channel namespace + "_model"
-
-    onEvent = onevent or= ( parent, key, event, info ) ->
+    onEvent = ( parent, key, event, info ) ->
       channel.publish { event: event, parent: parent, key: key, info: info }
-    namespace = namespace or= ""
+    nmspc = ""
+
+    if arguments.length is 2
+      if typeof arguments[1] is "function"
+        onEvent = onevent
+      else
+        nmspc = onevent
+    else if arguments.length is 3
+      onEvent = onevent
+      nmspc = namespace
+
+    dependencyManager.addNamespace nmspc
+
+    channel = postal.channel nmspc + "_model"
     
     proxy = onProxyOf target,
-    -> new ArrayWrapper( target, onEvent, namespace ),
-    -> new ObjectWrapper( target, onEvent, namespace ),
+    -> new ArrayWrapper( target, onEvent, nmspc ),
+    -> new ObjectWrapper( target, onEvent, nmspc ),
     -> target
     -> target
 
-    proxy.subscribe namespace + "_events"
-    add namespace, proxy
+    proxy.subscribe nmspc + "_events"
+    add nmspc, proxy
     proxy
 
   self

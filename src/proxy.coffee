@@ -29,6 +29,7 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @sort = (fn) -> proxy.sort(fn)
   @join = (separator) -> proxy.join(separator)
   @toString = () -> proxy.toString()
+  @splice = () -> proxy.splice.apply(proxy,Array::slice.call(arguments, 0))
 
   this
 
@@ -239,36 +240,68 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     value
 
   @indexOf = ->
-    idx = subject.indexOf.apply(subject, arguments)
-    len = subject.length
-    i = 0
-    #TODO: I'm sure there's a better way to do this in coffee script
-    if idx is -1
+    i = undefined
+    value = undefined
+    len = undefined
+    if typeof x is "ObjectWrapper" or typeof x is "ArrayWrapper"
+      len = wrapper.length
       while i < len
         if wrapper[i] is arguments[0]
-          idx = i
+          value = i
           break
         i++
-    notify buildFqn(fullPath, idx), "read", {
+    else
+      value = subject.indexOf(x)
+
+    notify buildFqn(fullPath, value), "read", {
       index: subject.length
-      value: idx
+      value: value
     }
-    idx
+    value
 
   @lastIndexOf = ->
-    idx = subject.lastIndexOf.apply(subject, arguments)
-    i = subject.length - 1
-    if idx is -1
+    i = wrapper.length - 1
+    value = undefined
+    if typeof x is "ObjectWrapper" or typeof x is "ArrayWrapper"
       while i >= 0
         if wrapper[i] is arguments[0]
-          idx = i
+          value = i
           break
         i--
-    notify buildFqn(fullPath, idx), "read", {
+    else
+      value = subject.indexOf(x)
+
+    notify buildFqn(fullPath, value), "read", {
       index: subject.length
-      value: idx
+      value: value
     }
-    idx
+    value
+
+  @splice = ->
+    args = Array::slice.call(arguments, 0, 2)
+    newItems = Array::slice.call(arguments, 2)
+    len = newItems.length
+    subjLen = subject.length
+    value = undefined
+    i = 0
+    stIdx = 0
+    while i < len
+      if typeof newItems[i] is "ObjectWrapper" or typeof newItems[i] is "ArrayWrapper"
+        newItems[i] = newItems[i].getOriginal()
+      i++
+    if args[0] >= 0
+      stIdx = i = args[0]
+    else
+      stIdx = i = subject.length + args[0]
+    chgLen = args[1] + args[0]
+    while i <= subjLen
+      removeChildPath i
+      @remove i, wrapper[i], []  if i <= chgLen
+      i++
+    value = subject.splice.apply(subject, args.concat(newItems))
+    @recrawl [stIdx..subject.length-1]
+    replicant.create value, fullPath
+    
 
   Object.defineProperty wrapper, "length",
     get: ->
