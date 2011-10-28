@@ -616,3 +616,46 @@ QUnit.specify "array", ->
           assert(result.length).equals(2);
           assert(result[0].name).equals("Jim");
           assert(result[1].name).equals("Alex");
+
+  describe "when calling concat", ->
+    describe "on primitive types", ->
+      test30 = {}
+      result = undefined
+      before ->
+        test30 =
+          list: [1,2,3,4,5,6]
+        test30 = replicant.create(test30)
+        result = test30.list.concat([7,8,9,10], 11, 12)
+
+      it "should return the expected values", ->
+        assert(result.length).equals(12)
+        assert(result[0]).equals(1)
+        assert(result[1]).equals(2)
+        assert(result[2]).equals(3)
+        assert(result[3]).equals(4)
+        assert(result[4]).equals(5)
+        assert(result[5]).equals(6)
+        assert(result[6]).equals(7)
+        assert(result[7]).equals(8)
+        assert(result[8]).equals(9)
+        assert(result[9]).equals(10)
+        assert(result[10]).equals(11)
+        assert(result[11]).equals(12)
+    describe "on complex types", ->
+      test31 = {}
+      result = undefined
+      before ->
+        test31 =
+          list: [{name:"Jim"}, {name:"Alex"}, {name:"Chris"}, {name:"Ian"}]
+        test31 = replicant.create(test31)
+        result = test31.list.concat([{name:"Esna"}, {name:"Kevin"}], {name: "John"})
+
+      it "should return the expected values", ->
+        assert(result.length).equals(7)
+        assert(result[0].name).equals("Jim")
+        assert(result[1].name).equals("Alex")
+        assert(result[2].name).equals("Chris")
+        assert(result[3].name).equals("Ian")
+        assert(result[4].name).equals("Esna")
+        assert(result[5].name).equals("Kevin")
+        assert(result[6].name).equals("John")

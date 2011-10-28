@@ -33,6 +33,7 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @slice = () -> proxy.slice.apply(proxy, Array::slice.call(arguments, 0))
   @indexOf = (x) -> proxy.indexOf(x)
   @lastIndexOf = (x) -> proxy.lastIndexOf(x)
+  @concat = () -> proxy.concat.apply(proxy, Array::slice.call(arguments,0))
 
   this
 
@@ -317,6 +318,23 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     while startIdx < endIdx
       value.push wrapper[startIdx]
       startIdx++
+    replicant.create value, fullPath
+
+  @concat = ->
+    value = []
+    args = Array::slice.call(arguments, 0)
+    i = 0
+    len = subject.length
+    while i < subject.length
+      value.push wrapper[i]
+      i++
+    i = 0
+    _.each args, (arg) ->
+      if _.isArray(arg)
+        _.each arg, (item) ->
+          value.push item
+      else
+        value.push arg
     replicant.create value, fullPath
     
 
