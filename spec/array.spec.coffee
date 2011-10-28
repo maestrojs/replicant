@@ -235,6 +235,7 @@ QUnit.specify "array", ->
         test10 =
             dummy:
                 list: [1,2,3,4]
+        test10 = replicant.create(test10)
       describe "with an item NOT in the array", ->
         idx = undefined
         before ->
@@ -261,6 +262,7 @@ QUnit.specify "array", ->
         test11 =
             dummy:
                 list: [item1, item2, item3]
+        test11 = replicant.create(test11)
       describe "with an item NOT in the array", ->
         idx = undefined
         before ->
@@ -287,6 +289,7 @@ QUnit.specify "array", ->
         test12 =
             dummy:
                 list: [item1, item2, item3]
+        test12 = replicant.create(test12)
       describe "with an item NOT in the array", ->
         idx = undefined
         before ->
@@ -310,6 +313,7 @@ QUnit.specify "array", ->
         test13 =
             dummy:
                 list: [1,2,3,4,1,2,3,4]
+        test13 = replicant.create(test13)
       describe "with an item NOT in the array", ->
         idx = undefined
         before ->
@@ -323,8 +327,8 @@ QUnit.specify "array", ->
         before ->
           idx = test13.dummy.list.lastIndexOf(3);
 
-        it "should return 6", ->
-          assert(idx).equals(6)
+        it "should return 2", ->
+          assert(idx).equals(2)
 
     describe "on array of plain object types", ->
       test14 = {}
@@ -336,6 +340,7 @@ QUnit.specify "array", ->
         test14 =
             dummy:
                 list: [item1, item2, item3, item1, item2, item3]
+        test14 = replicant.create(test14)
       describe "with an item NOT in the array", ->
         idx = undefined
         before ->
@@ -349,8 +354,8 @@ QUnit.specify "array", ->
         before ->
           idx = test14.dummy.list.lastIndexOf(item1);
 
-        it "should return 3", ->
-          assert(idx).equals(3)
+        it "should return 0", ->
+          assert(idx).equals(0)
 
     describe "on array of proxy object types", ->
       test15 = {}
@@ -362,6 +367,7 @@ QUnit.specify "array", ->
         test15 =
             dummy:
                 list: [item1, item2, item3, item1, item2, item3]
+        test15 = replicant.create(test15)
       describe "with an item NOT in the array", ->
         idx = undefined
         before ->
@@ -375,8 +381,8 @@ QUnit.specify "array", ->
         before ->
           idx = test15.dummy.list.lastIndexOf(item1);
 
-        it "should return 3", ->
-          assert(idx).equals(3)
+        it "should return 0", ->
+          assert(idx).equals(0)
 
   describe "when calling splice", ->
     describe "on primitive types", ->
@@ -386,6 +392,7 @@ QUnit.specify "array", ->
         before ->
           test16 =
               list: [0,1,2,3,4,7,8]
+          test16 = replicant.create(test16)
           removed = test16.list.splice(5, 0, 5, 6)
         it "should insert 5 and 6", ->
           assert(test16.list[0]).equals(0)
@@ -398,7 +405,7 @@ QUnit.specify "array", ->
           assert(test16.list[7]).equals(7)
           assert(test16.list[8]).equals(8)
         it "should not have removed anything", ->
-          assert(removed).isSameAs([])
+          assert(removed.length).equals(0)
 
       describe "and removing elements", ->
         test17 = {}
@@ -406,6 +413,7 @@ QUnit.specify "array", ->
         before ->
           test17 =
               list: [0,1,2,3,4,5,6,6,6,7,8]
+          test17 = replicant.create(test17)
           removed = test17.list.splice(6, 2)
         it "should match expected result", ->
           assert(test17.list[0]).equals(0)
@@ -428,6 +436,7 @@ QUnit.specify "array", ->
         before ->
           test18 =
               list: [0,1,2,3,4,6,6,6,7,8]
+          test18 = replicant.create(test18)
           removed = test18.list.splice(5, 2, 5)
         it "should match expected result", ->
           assert(test18.list[0]).equals(0)
@@ -451,6 +460,7 @@ QUnit.specify "array", ->
         before ->
           test19 =
               list: [{name: "George"}, {name: "Thomas"}, {name: "John"}]
+          test19 = replicant.create(test19)
           removed = test19.list.splice(2, 0, {name: "James"}, {name: "Benjamin"})
         it "should insert 5 and 6", ->
           assert(test19.list[0].name).equals("George")
@@ -459,7 +469,7 @@ QUnit.specify "array", ->
           assert(test19.list[3].name).equals("Benjamin")
           assert(test19.list[4].name).equals("John")
         it "should not have removed anything", ->
-          assert(removed).isSameAs([])
+          assert(removed.length).equals(0)
 
       describe "and removing elements", ->
         test20 = {}
@@ -467,6 +477,7 @@ QUnit.specify "array", ->
         before ->
           test20 =
               list: [{name: "George"}, {name: "Thomas"}, {name: "John"}, {name: "James"},{name: "Woodrow"}, {name:"Teddy"}, {name: "Benjamin"}]
+          test20 = replicant.create(test20)
           removed = test20.list.splice(4, 2)
         it "should match expected result", ->
           assert(test20.list[0].name).equals("George")
@@ -485,6 +496,7 @@ QUnit.specify "array", ->
         before ->
           test21 =
               list: [{name: "George"}, {name: "Thomas"}, {name: "John"}, {name: "James"},{name: "Woodrow"}, {name:"Teddy"}, {name: "Benjamin"}]
+          test21 = replicant.create(test21)
           removed = test21.list.splice(4, 2, {name: "Ronald"}, {name: "Calvin"})
         it "should match expected result", ->
           assert(test21.list[0].name).equals("George")
@@ -498,3 +510,35 @@ QUnit.specify "array", ->
           assert(removed.length).equals(2)
           assert(removed[0].name).equals("Woodrow")
           assert(removed[1].name).equals("Teddy")
+
+  describe "when calling slice", ->
+    describe "on primitive types", ->
+      describe "with one argument", ->
+        test22 = {}
+        result = undefined
+        before ->
+          test22 =
+              list: [1,2,3,4,5,6,7,8,9,10]
+          test22 = replicant.create(test22)
+          result = test22.list.slice(5)
+        it "should return the expected values", ->
+          assert(result.length).equals(5);
+          assert(result[0]).equals(6);
+          assert(result[1]).equals(7);
+          assert(result[2]).equals(8);
+          assert(result[3]).equals(9);
+          assert(result[4]).equals(10);
+      describe "with two arguments", ->
+        test23 = {}
+        result = undefined
+        before ->
+          test23 =
+              list: [1,2,3,4,5,6,7,8,9,10]
+          test23 = replicant.create(test23)
+          result = test23.list.slice(5, 9)
+        it "should return the expected values", ->
+          assert(result.length).equals(4);
+          assert(result[0]).equals(6);
+          assert(result[1]).equals(7);
+          assert(result[2]).equals(8);
+          assert(result[3]).equals(9);

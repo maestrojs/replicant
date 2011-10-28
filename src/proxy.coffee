@@ -30,6 +30,9 @@ ArrayWrapper = (target, onEvent, namespace, addChild, removeChild) ->
   @join = (separator) -> proxy.join(separator)
   @toString = () -> proxy.toString()
   @splice = () -> proxy.splice.apply(proxy,Array::slice.call(arguments, 0))
+  @slice = () -> proxy.slice.apply(proxy, Array::slice.call(arguments, 0))
+  @indexOf = (x) -> proxy.indexOf(x)
+  @lastIndexOf = (x) -> proxy.lastIndexOf(x)
 
   this
 
@@ -183,8 +186,6 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
       index: subject.length
       value: value
     }
-    #TODO: remove console.logs when done
-    console.log wrapper
     value
 
   @recrawl = (keys) ->
@@ -239,32 +240,31 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     @genReadNotices [0..subject.length-1]
     value
 
-  @indexOf = ->
+  @indexOf = (x)->
     i = undefined
-    value = undefined
+    value = -1
     len = undefined
     if typeof x is "ObjectWrapper" or typeof x is "ArrayWrapper"
       len = wrapper.length
       while i < len
-        if wrapper[i] is arguments[0]
+        if wrapper[i] is x
           value = i
           break
         i++
     else
       value = subject.indexOf(x)
-
     notify buildFqn(fullPath, value), "read", {
       index: subject.length
       value: value
     }
     value
 
-  @lastIndexOf = ->
+  @lastIndexOf = (x) ->
     i = wrapper.length - 1
-    value = undefined
+    value = -1
     if typeof x is "ObjectWrapper" or typeof x is "ArrayWrapper"
       while i >= 0
-        if wrapper[i] is arguments[0]
+        if wrapper[i] is x
           value = i
           break
         i--
@@ -282,24 +282,41 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     newItems = Array::slice.call(arguments, 2)
     len = newItems.length
     subjLen = subject.length
-    value = undefined
+    value = []
     i = 0
     stIdx = 0
-    while i < len
-      if typeof newItems[i] is "ObjectWrapper" or typeof newItems[i] is "ArrayWrapper"
-        newItems[i] = newItems[i].getOriginal()
-      i++
     if args[0] >= 0
       stIdx = i = args[0]
     else
       stIdx = i = subject.length + args[0]
     chgLen = args[1] + args[0]
     while i <= subjLen
+      if i < chgLen
+        value.push wrapper[i]
+        @remove i, wrapper[i], []
       removeChildPath i
-      @remove i, wrapper[i], []  if i <= chgLen
       i++
-    value = subject.splice.apply(subject, args.concat(newItems))
-    @recrawl [stIdx..subject.length-1]
+    # TODO: re-think this? (JC)
+    subject.splice.apply(subject, args.concat(newItems))
+    @add k, [k] for k in [stIdx..subject.length-1]
+    replicant.create value, fullPath
+
+  @slice = ->
+    startIdx = 0
+    endIdx = subject.length
+    value = []
+    if arguments[0] < 0
+      startIdx = subject.length - arguments[0]
+    else
+      startIdx = arguments[0]
+    if arguments[1]
+      if arguments[1] < 0
+        endIdx = subject.length - arguments[1]
+      else
+        endIdx = arguments[1]
+    while startIdx < endIdx
+      value.push wrapper[startIdx]
+      startIdx++
     replicant.create value, fullPath
     
 
