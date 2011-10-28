@@ -542,3 +542,77 @@ QUnit.specify "array", ->
           assert(result[1]).equals(7);
           assert(result[2]).equals(8);
           assert(result[3]).equals(9);
+      describe "with one negative value argument", ->
+        test24 = {}
+        result = undefined
+        before ->
+          test24 =
+              list: [1,2,3,4,5,6,7,8,9,10]
+          test24 = replicant.create(test24)
+          result = test24.list.slice(-2)
+        it "should return the expected values", ->
+          assert(result.length).equals(2);
+          assert(result[0]).equals(9);
+          assert(result[1]).equals(10);
+      describe "with two negative value arguments", ->
+        test25 = {}
+        result = undefined
+        before ->
+          test25 =
+              list: [1,2,3,4,5,6,7,8,9,10]
+          test25 = replicant.create(test25)
+          result = test25.list.slice(-4, -2)
+        it "should return the expected values", ->
+          assert(result.length).equals(2);
+          assert(result[0]).equals(7);
+          assert(result[1]).equals(8);
+
+    describe "on complex types", ->
+      describe "with one argument", ->
+        test26 = {}
+        result = undefined
+        before ->
+          test26 =
+              list: [{name:"Jim"}, {name:"Alex"}, {name:"Chris"}, {name:"Ian"}]
+          test26 = replicant.create(test26)
+          result = test26.list.slice(2)
+        it "should return the expected values", ->
+          assert(result.length).equals(2);
+          assert(result[0].name).equals("Chris");
+          assert(result[1].name).equals("Ian");
+      describe "with two arguments", ->
+        test27 = {}
+        result = undefined
+        before ->
+          test27 =
+              list: [{name:"Jim"}, {name:"Alex"}, {name:"Chris"}, {name:"Ian"}]
+          test27 = replicant.create(test27)
+          result = test27.list.slice(0, 2)
+        it "should return the expected values", ->
+          assert(result.length).equals(2);
+          assert(result[0].name).equals("Jim");
+          assert(result[1].name).equals("Alex");
+      describe "with one negative value argument", ->
+        test28 = {}
+        result = undefined
+        before ->
+          test28 =
+              list: [{name:"Jim"}, {name:"Alex"}, {name:"Chris"}, {name:"Ian"}]
+          test28 = replicant.create(test28)
+          result = test28.list.slice(-2)
+        it "should return the expected values", ->
+          assert(result.length).equals(2);
+          assert(result[0].name).equals("Chris");
+          assert(result[1].name).equals("Ian");
+      describe "with two negative value arguments", ->
+        test29 = {}
+        result = undefined
+        before ->
+          test29 =
+              list: [{name:"Jim"}, {name:"Alex"}, {name:"Chris"}, {name:"Ian"}]
+          test29 = replicant.create(test29)
+          result = test29.list.slice(-4, -2)
+        it "should return the expected values", ->
+          assert(result.length).equals(2);
+          assert(result[0].name).equals("Jim");
+          assert(result[1].name).equals("Alex");

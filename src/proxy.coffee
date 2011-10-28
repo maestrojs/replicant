@@ -306,12 +306,12 @@ Proxy = (wrapper, target, onEvent, namespace, addChild, removeChild) ->
     endIdx = subject.length
     value = []
     if arguments[0] < 0
-      startIdx = subject.length - arguments[0]
+      startIdx = subject.length + arguments[0]
     else
       startIdx = arguments[0]
     if arguments[1]
       if arguments[1] < 0
-        endIdx = subject.length - arguments[1]
+        endIdx = subject.length + arguments[1]
       else
         endIdx = arguments[1]
     while startIdx < endIdx
